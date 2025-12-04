@@ -1,0 +1,17 @@
+# Code-Graph Project Registry
+# Auto-updated by init-project-graph.sh
+# Format: TOON (Tab-Organized Object Notation)
+
+# Projects initialized with code-graph-rag
+projects:
+	# Example entry:
+	# - name: my-project
+	#   path: /path/to/project
+	#   group: my-group
+	#   databases: [codegraph_my-project, codegraph_my-group]
+	#   initialized_at: 2024-12-01T14:30:00
+	- name: bible-search-tool
+	  path: /Users/hunter/code/ai_agency/projects/bible-vault/bible-search-tool
+	  group: "bible-vault"
+	  databases: [codegraph_bible-search-tool, codegraph_bible-vault]
+	  initialized_at: 2025-12-04T15:55:00

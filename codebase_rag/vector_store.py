@@ -1,6 +1,7 @@
 # codebase_rag/vector_store.py
 from loguru import logger
 
+from .config import settings
 from .utils.dependencies import has_qdrant_client
 
 if has_qdrant_client():
@@ -20,7 +21,10 @@ if has_qdrant_client():
             if not _CLIENT.collection_exists(_COLLECTION):
                 _CLIENT.create_collection(
                     collection_name=_COLLECTION,
-                    vectors_config=VectorParams(size=768, distance=Distance.COSINE),
+                    vectors_config=VectorParams(
+                        size=settings.EMBEDDING_DIMENSIONS,
+                        distance=Distance.COSINE,
+                    ),
                 )
         return _CLIENT
 

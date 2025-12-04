@@ -15,3 +15,9 @@ wheels/
 .pytest_cache/
 .claude/
 .qdrant_code_embeddings/
+
+# Codebase intelligence - all auto-generated/derived data
+.codebase-intelligence/
+
+# Vector search data
+.vector-search/

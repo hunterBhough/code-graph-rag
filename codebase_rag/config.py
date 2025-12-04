@@ -74,6 +74,14 @@ class AppConfig(BaseSettings):
     TARGET_REPO_PATH: str = "."
     SHELL_COMMAND_TIMEOUT: int = 30
 
+    # Embedding settings
+    EMBEDDING_ENDPOINT: str = "http://192.168.0.121:11434"  # Inference server
+    EMBEDDING_MODEL: str = "manutic/nomic-embed-code:7b-q8_0"  # Code embedding model
+    EMBEDDING_DIMENSIONS: int = 3584  # nomic-embed-code dimensions
+    EMBEDDING_BATCH_SIZE: int = 10  # Number of embeddings per batch
+    EMBEDDING_BATCH_DELAY: float = 0.5  # Seconds to sleep between batches
+    EMBEDDING_ENABLED: bool = True  # Set to False to disable semantic embeddings entirely
+
     # Runtime overrides
     _active_orchestrator: ModelConfig | None = None
     _active_cypher: ModelConfig | None = None
@@ -173,6 +181,8 @@ IGNORE_PATTERNS = {
     "node_modules",
     "build",
     "dist",
+    "vendor",
+    "research_papers",
     ".eggs",
     ".pytest_cache",
     ".mypy_cache",

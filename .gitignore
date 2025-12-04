@@ -21,3 +21,6 @@ wheels/
 
 # Vector search data
 .vector-search/
+
+# Infrastructure logs (can be large)
+infrastructure/logs/*.log

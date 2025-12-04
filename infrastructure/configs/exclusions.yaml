@@ -1,0 +1,157 @@
+# Code-Graph Exclusion Patterns
+# Directories and files to ignore when indexing
+
+# Version Control
+exclude_dirs:
+  - .git
+  - .svn
+  - .hg
+
+# Dependencies
+dependencies:
+  - node_modules
+  - bower_components
+  - vendor          # Go, PHP dependencies
+  - Pods            # iOS CocoaPods
+  - packages        # .NET packages
+
+# Virtual Environments
+python_envs:
+  - .venv
+  - venv
+  - env
+  - ENV
+  - virtualenv
+  - .virtualenv
+  - __pycache__
+
+# Build Outputs
+build_dirs:
+  - build
+  - dist
+  - out
+  - target         # Java/Rust builds
+  - bin
+  - obj
+  - .next          # Next.js
+  - .nuxt          # Nuxt.js
+  - .output        # Nitro
+  - .vercel
+  - .netlify
+
+# Caches
+cache_dirs:
+  - .cache
+  - .parcel-cache
+  - .webpack
+  - .turbo
+  - .tmp
+  - tmp
+  - temp
+  - .temp
+
+# IDE/Editor
+ide_dirs:
+  - .idea          # IntelliJ
+  - .vscode
+  - .vs            # Visual Studio
+  - .eclipse
+  - .settings
+
+# OS
+os_dirs:
+  - .DS_Store
+  - Thumbs.db
+  - desktop.ini
+
+# Logs
+log_dirs:
+  - logs
+  - log
+  - "*.log"
+
+# Test Coverage
+coverage_dirs:
+  - coverage
+  - .coverage
+  - .nyc_output
+  - htmlcov
+  - .pytest_cache
+
+# Documentation Build
+docs_build:
+  - _site          # Jekyll
+  - .docusaurus
+  - docs/_build
+  - site           # MkDocs
+
+# Lock Files (optional - you might want to index these)
+lock_files:
+  - package-lock.json
+  - yarn.lock
+  - pnpm-lock.yaml
+  - Gemfile.lock
+  - Cargo.lock
+  - poetry.lock
+  - composer.lock
+
+# File Extensions to Ignore
+ignore_extensions:
+  - .pyc
+  - .pyo
+  - .so
+  - .dylib
+  - .class
+  - .jar
+  - .war
+  - .ear
+  - .zip
+  - .tar.gz
+  - .rar
+  - .exe
+  - .dll
+  - .obj
+  - .o
+  - .a
+  - .lib
+  - .pdf
+  - .png
+  - .jpg
+  - .jpeg
+  - .gif
+  - .svg
+  - .ico
+  - .woff
+  - .woff2
+  - .ttf
+  - .eot
+  - .mp4
+  - .mp3
+  - .wav
+
+# Minimum File Size (bytes) - skip very large files
+max_file_size: 1048576  # 1MB
+
+# File Extensions to ALWAYS Index (override above)
+always_index:
+  - .py
+  - .js
+  - .jsx
+  - .ts
+  - .tsx
+  - .java
+  - .cpp
+  - .hpp
+  - .c
+  - .h
+  - .rs
+  - .go
+  - .lua
+  - .rb
+  - .php
+  - .swift
+  - .kt
+  - .scala
+  - .cs
+  - .m
+  - .mm

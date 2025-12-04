@@ -1,0 +1,52 @@
+# Project Group Configuration for Code-Graph
+# Each group gets its own shared graph database
+# Projects in the same group can reference each other's code
+
+# Life/Personal Projects
+life:
+  name: "Life Projects"
+  description: "Personal life management tools"
+  projects:
+    - ~/code/ai_agency/projects/gym-bot
+    - ~/code/ai_agency/projects/food-tracker
+    - ~/code/ai_agency/projects/finance-manager
+    - ~/code/ai_agency/projects/secretary
+
+# MCP Servers
+mcp-servers:
+  name: "MCP Servers"
+  description: "Model Context Protocol servers"
+  projects:
+    - ~/code/ai_agency/shared/mcp-servers/ai-gateway-mcp
+    - ~/code/ai_agency/shared/mcp-servers/vector-search-mcp
+    - ~/code/ai_agency/shared/mcp-servers/mcp-service-wrappers
+    - ~/code/ai_agency/shared/mcp-servers/conversational-memory-mcp
+    - ~/code/ai_agency/shared/scripts/codebase-intelligence
+    - ~/code/ai_agency/vendor/code-graph-rag
+
+# Dashboard Projects
+dashboard:
+  name: "Dashboard"
+  description: "AI control dashboards and topology designers"
+  projects:
+    - ~/code/ai_agency/shared/dashboard/remote-ai-control
+    - ~/code/ai_agency/shared/dashboard/claude-topology-designer
+
+# Bible Study Projects
+bible:
+  name: "Bible Study"
+  description: "Obsidian Bible study tools"
+  projects:
+    - ~/code/go/src/github.com/hunterBhough/bible/obsidian-study-bible
+    - ~/code/go/src/github.com/hunterBhough/bible/obsidian-study-bible-scraper
+    - ~/code/go/src/github.com/hunterBhough/bible/obsidian-study-bible-infrastructure-serverless
+    - ~/code/go/src/github.com/hunterBhough/bible/obsidian-study-bible-website
+    - ~/code/go/src/github.com/hunterBhough/bible/obsidian-study-bible-infrastructure
+    - ~/code/go/src/github.com/hunterBhough/bible/obsidian-study-bible-marketing
+
+# Brain Projects
+brain:
+  name: "Brain"
+  description: "AI orchestration and cognition"
+  projects:
+    - ~/code/ai_agency/brain/mastermind

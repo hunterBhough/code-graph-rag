@@ -78,6 +78,38 @@ The system consists of two main components:
 1. **Multi-language Parser**: Tree-sitter based parsing system that analyzes codebases and ingests data into Memgraph
 2. **RAG System** (`codebase_rag/`): Interactive CLI for querying the stored knowledge graph
 
+## 🏢 Infrastructure & Project Setup
+
+Code-graph-rag includes infrastructure for deploying automated code analysis across multiple projects:
+
+### Quick Project Setup
+
+```bash
+# Initialize code-graph for any project
+./init-project-graph.sh /path/to/project
+
+# With group graph (analyze related projects together)
+./init-project-graph.sh /path/to/project --group mcp-servers
+```
+
+### What Gets Installed
+
+- **Auto-update script**: `.codebase-intelligence/code-graph/update.sh` in your project
+- **Git hook**: Post-commit hook triggers graph updates automatically
+- **Knowledge graphs**: Project-level and optional group-level graphs in Memgraph
+- **Registry entry**: Project tracked in `infrastructure/registry/projects.toon`
+
+### Features
+
+- **Automated Updates**: Code graphs update automatically after each commit via git hooks
+- **Project Groups**: Share knowledge graphs across related projects (e.g., all MCP servers)
+- **Centralized Logging**: Group-level logs stored centrally, project logs stored locally
+- **Database Naming**: `codegraph_<project-name>` for projects, `codegraph_<group-name>` for groups
+
+### Documentation
+
+- **[Infrastructure Guide](docs/INFRASTRUCTURE.md)**: Comprehensive setup and usage documentation
+- **[Claude Code Guide](CLAUDE.md)**: Integration with Claude Code and development workflows
 
 ## 📋 Prerequisites
 

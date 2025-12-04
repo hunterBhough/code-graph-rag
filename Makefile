@@ -1,4 +1,4 @@
-.PHONY: help all install dev test clean python
+.PHONY: help all install dev test clean python publish build-grammars watch test-parallel
 
 help: ## Show this help message
 	@echo "Available targets:"
@@ -51,3 +51,13 @@ watch: ## Watch repository for changes and update graph in real-time
 		--host $(or $(HOST),localhost) \
 		--port $(or $(PORT),7687) \
 		$(if $(BATCH_SIZE),--batch-size $(BATCH_SIZE),)
+
+publish: install ## Register as user-level MCP server for Claude Code
+	@echo "📦 Publishing code-graph-rag to user-level MCP servers..."
+	-claude mcp remove code-graph --scope user 2>/dev/null || true
+	claude mcp add code-graph --scope user -- uv run --directory $(CURDIR) graph-code mcp-server
+	@echo ""
+	@echo "✅ Published successfully!"
+	@echo "Restart Claude Code to use the updated code-graph server."
+	@echo ""
+	@echo "Note: The MCP server inherits TARGET_REPO_PATH from Claude Code's working directory."

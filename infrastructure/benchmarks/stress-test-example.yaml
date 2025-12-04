@@ -1,0 +1,228 @@
+# Example stress test benchmark file
+# This serves as a template for actual test results
+
+metadata:
+  date: "2025-12-04"
+  time: "12:00:00"
+  codebase: "code-graph-rag"
+  memgraph_version: "2.x"
+  indexed_files: 150
+  indexed_nodes: 2500
+
+results:
+  basic_queries:
+    Q1:
+      query: "Find all Python files in the codebase"
+      status: pass
+      response_time_ms: 1200
+      result_count: 85
+      notes: "Successfully returned all .py files"
+    Q2:
+      query: "What classes are defined in the codebase?"
+      status: pass
+      response_time_ms: 950
+      result_count: 25
+      notes: "Found all major classes including MCPToolsRegistry, CypherGenerator"
+    Q3:
+      query: "List all functions in the tools module"
+      status: partial
+      response_time_ms: 1100
+      result_count: 12
+      notes: "Found functions but may have missed some nested ones"
+    Q4:
+      query: "What methods does MCPToolsRegistry have?"
+      status: pass
+      response_time_ms: 800
+      result_count: 10
+      notes: "All methods correctly identified"
+    Q5:
+      query: "Find functions decorated with @dataclass"
+      status: pass
+      response_time_ms: 600
+      result_count: 3
+      notes: "Correctly found dataclass decorated items"
+    Q6:
+      query: "What does the CypherGenerator class call?"
+      status: pass
+      response_time_ms: 1500
+      result_count: 8
+      notes: "CALLS relationships correctly traced"
+    Q7:
+      query: "Show me files in the parsers folder"
+      status: pass
+      response_time_ms: 700
+      result_count: 20
+      notes: "All parser files found"
+    Q8:
+      query: "Find all modules that import loguru"
+      status: pass
+      response_time_ms: 900
+      result_count: 15
+      notes: "IMPORTS relationships working correctly"
+
+  code_retrieval:
+    C1:
+      qualified_name: "codebase_rag.mcp.tools.MCPToolsRegistry"
+      status: pass
+      response_time_ms: 500
+      found: true
+      line_count: 150
+      notes: "Full class source retrieved with all methods"
+    C2:
+      qualified_name: "codebase_rag.services.llm.CypherGenerator.generate"
+      status: pass
+      response_time_ms: 300
+      found: true
+      line_count: 20
+      notes: "Method source correctly extracted"
+    C3:
+      qualified_name: "codebase_rag.prompts.GRAPH_SCHEMA_AND_RULES"
+      status: partial
+      response_time_ms: 250
+      found: true
+      line_count: 45
+      notes: "Retrieved but constants may need special handling"
+    C4:
+      qualified_name: "codebase_rag.tools.codebase_query.create_query_tool"
+      status: pass
+      response_time_ms: 350
+      found: true
+      line_count: 60
+      notes: "Factory function fully retrieved"
+    C5:
+      qualified_name: "nonexistent.module.FakeClass"
+      status: pass
+      response_time_ms: 100
+      found: false
+      line_count: 0
+      notes: "Gracefully handled missing entity with clear error"
+
+  natural_language:
+    N1:
+      query: "How does the system generate Cypher queries from natural language?"
+      status: pass
+      response_time_ms: 2500
+      cypher_generated: "MATCH (c:Class) WHERE c.name = 'CypherGenerator' RETURN c.name AS name, c.qualified_name AS qualified_name;"
+      result_quality: accurate
+      notes: "Correctly identified CypherGenerator as the key component"
+    N2:
+      query: "What is the main entry point of the MCP server?"
+      status: partial
+      response_time_ms: 2800
+      cypher_generated: "MATCH (f:File) WHERE f.name CONTAINS 'main' OR f.name CONTAINS 'server' RETURN f.path AS path;"
+      result_quality: partial
+      notes: "Found relevant files but didn't identify the specific entry function"
+    N3:
+      query: "Show me the inheritance hierarchy in the codebase"
+      status: pass
+      response_time_ms: 1800
+      cypher_generated: "MATCH (c1:Class)-[:INHERITS]->(c2:Class) RETURN c1.name AS child, c2.name AS parent;"
+      result_quality: accurate
+      notes: "Correctly queried INHERITS relationships"
+    N4:
+      query: "Which functions are most called by other functions?"
+      status: partial
+      response_time_ms: 3200
+      cypher_generated: "MATCH (f:Function)<-[:CALLS]-(caller) RETURN f.name AS function, count(caller) AS call_count ORDER BY call_count DESC LIMIT 10;"
+      result_quality: partial
+      notes: "Query logic correct but may miss Method nodes"
+    N5:
+      query: "Find code related to error handling"
+      status: partial
+      response_time_ms: 2100
+      cypher_generated: "MATCH (n) WHERE toLower(n.name) CONTAINS 'error' OR toLower(n.name) CONTAINS 'exception' RETURN n.name AS name, labels(n) AS type;"
+      result_quality: partial
+      notes: "Found Exception classes but semantic search would be better for try/except patterns"
+
+  edge_cases:
+    E1:
+      test: "Empty query"
+      input: ""
+      status: pass
+      handled_gracefully: true
+      error_message: "Query cannot be empty. Please provide a question about the codebase."
+    E2:
+      test: "SQL injection attempt"
+      input: "'; DROP DATABASE; --"
+      status: pass
+      handled_gracefully: true
+      error_message: "Could not generate a valid Cypher query from the input."
+    E3:
+      test: "Very long query"
+      input: "[500+ character question about multiple aspects of the codebase...]"
+      status: pass
+      handled_gracefully: true
+      error_message: null
+    E4:
+      test: "Non-English query"
+      input: "Zeige mir alle Klassen"
+      status: partial
+      handled_gracefully: true
+      error_message: null
+      notes: "Attempted to process but results were less accurate"
+    E5:
+      test: "Ambiguous query"
+      input: "Find the thing"
+      status: pass
+      handled_gracefully: true
+      error_message: null
+      notes: "Returned broad results, could benefit from clarification prompts"
+
+  performance:
+    P1:
+      test: "Simple query response time"
+      metric: "Time to first result"
+      target_ms: 5000
+      avg_ms: 1200
+      max_ms: 2800
+      min_ms: 600
+      target_met: true
+    P2:
+      test: "Complex query response time"
+      metric: "Time for relationship queries"
+      target_ms: 15000
+      avg_ms: 2500
+      max_ms: 4200
+      min_ms: 1500
+      target_met: true
+    P3:
+      test: "Code snippet retrieval"
+      metric: "Time to fetch source"
+      target_ms: 3000
+      avg_ms: 400
+      max_ms: 800
+      min_ms: 100
+      target_met: true
+    P4:
+      test: "Concurrent queries"
+      metric: "All complete successfully"
+      queries_sent: 3
+      queries_completed: 3
+      any_failures: false
+      target_met: true
+      notes: "No deadlocks or race conditions observed"
+
+summary:
+  total_tests: 22
+  passed: 18
+  partial: 4
+  failed: 0
+  pass_rate: "81.8%"
+
+  strengths:
+    - "Fast response times for basic structural queries"
+    - "Excellent code snippet retrieval accuracy"
+    - "Robust error handling for edge cases"
+    - "Good handling of relationship queries (CALLS, INHERITS)"
+
+  weaknesses:
+    - "NL queries for semantic concepts could be improved"
+    - "Some complex queries miss Method nodes (only find Function)"
+    - "Entry point detection requires multiple query refinement"
+    - "Non-English support is limited"
+
+  recommendations:
+    - "Add Method nodes to more queries by using (Function|Method) patterns"
+    - "Implement semantic search fallback for concept-based queries"
+    - "Consider caching common query patterns for performance"
+    - "Add query suggestion/refinement for ambiguous inputs"

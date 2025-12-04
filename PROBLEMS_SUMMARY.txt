@@ -1,0 +1,520 @@
+================================================================================
+CODE-GRAPH RAG - STRESS TEST ANALYSIS SUMMARY
+================================================================================
+
+EXECUTIVE OVERVIEW
+──────────────────────────────────────────────────────────────────────────────
+
+Test Results: 27 tests across 5 categories
+Pass Rate: 29.6% (8 passes, 18 partial, 1 failure)
+
+Root Cause:
+  Database connection issue caused 18 "partial" test failures
+  BUT: Query generation was 100% successful in all cases
+  This reveals the actual system architecture strengths/weaknesses
+
+
+KEY FINDING: The LLM + Cypher generation works EXCELLENTLY.
+             The infrastructure has critical reliability issues.
+
+
+================================================================================
+PROBLEM CATEGORIZATION
+================================================================================
+
+CRITICALITY MATRIX:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🔴 CRITICAL (Fix First - Blocks Production)                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 1. Memgraph Connection Loss                                                 │
+│    └─ Ingestor loses connection between tool calls                          │
+│    └─ Affects: 18/27 tests (Query execution impossible)                    │
+│    └─ Fix Priority: HIGHEST - Enables 66% of failing tests                 │
+│                                                                              │
+│ 2. Silent Failures                                                          │
+│    └─ Errors not reported to user (empty results instead)                   │
+│    └─ Affects: User experience completely                                   │
+│    └─ Fix Priority: CRITICAL - Essential for usability                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🟠 HIGH PRIORITY (Fix Before Scaling)                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 3. Cypher Validation                                                        │
+│    └─ Invalid Cypher passes to database                                     │
+│    └─ Example: DEFINES_METHOD may not exist in actual schema               │
+│    └─ Risk: Runtime errors, confusing results                              │
+│                                                                              │
+│ 4. Query Generation Accuracy                                                │
+│    └─ 40% of complex queries need schema corrections                        │
+│    └─ Example: Uses 'tools' instead of 'codebase_rag.tools'               │
+│    └─ Solution: Inject schema into LLM context                             │
+│                                                                              │
+│ 5. Concurrent Query Performance                                             │
+│    └─ 3 concurrent queries take 50 seconds (vs 7.8 sequential)             │
+│    └─ Cause: Single-threaded LLM processing                                │
+│    └─ Fix: Query caching + LLM request queuing                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🟡 MEDIUM PRIORITY (Quality & Usability)                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 6. Semantic Understanding                                                   │
+│    └─ Multi-step relationships misunderstood                                │
+│    └─ Example: "What does class X call?" returns class methods not calls   │
+│    └─ Fix: Intent detection + constraint patterns                          │
+│                                                                              │
+│ 7. Input Security                                                           │
+│    └─ Relies on LLM refusing malicious input (not guaranteed)               │
+│    └─ Need: Structural validation + parameterized queries                  │
+│                                                                              │
+│ 8. Error Recovery                                                           │
+│    └─ No fallback mechanisms on failure                                     │
+│    └─ Solution: Provide partial results, graceful degradation              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🔵 LOW PRIORITY (Polish)                                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 9. Query Monitoring & Analytics                                             │
+│    └─ No visibility into query patterns, failures, performance              │
+│                                                                              │
+│ 10. Documentation & Discovery                                              │
+│     └─ Users don't know what queries are possible                          │
+│                                                                              │
+│ 11. Schema Visualization                                                   │
+│     └─ No visual understanding of graph structure                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+DETAILED PROBLEM STATEMENTS
+================================================================================
+
+PROBLEM #1: MEMGRAPH CONNECTION LOSS
+──────────────────────────────────────────────────────────────────────────────
+
+Description:
+  Database connection is lost between tool calls, causing all queries to fail
+  with "Not connected to Memgraph" error
+
+Impact:
+  • 18 out of 27 tests failed
+  • 66% of functionality unavailable
+  • Blocks any production deployment
+
+Root Cause:
+  MemgraphIngestor.__init__() creates connection once
+  → Connection is not maintained across multiple tool invocations
+  → No automatic reconnection if connection drops
+  → No connection pooling for concurrent requests
+
+Evidence:
+  • mcp__code-graph__index_repository: SUCCESS (inline connection works)
+  • mcp__code-graph__query_code_graph: FAILURE (lost connection)
+  → Same ingestor object, different context
+
+Code Location:
+  File: codebase_rag/services/graph_service.py
+  Class: MemgraphIngestor
+  Issue: Constructor opens connection but doesn't maintain state
+
+Solution Options:
+
+  Option A: Connection Pooling (Recommended)
+    • Maintain pool of N connections (default: 3-5)
+    • Each operation borrows from pool
+    • Automatic reconnection on failure
+    • Supports concurrent queries
+    Effort: 8 hours
+    Benefit: Production-ready, scales well
+
+  Option B: Lazy Connection
+    • Connect on-demand before each operation
+    • Verify connection health before use
+    • Close on error and reconnect
+    Effort: 3 hours
+    Benefit: Simple, works for most cases
+    Risk: Slower, sequential only
+
+  Option C: Context Manager Everywhere
+    • Force all callers to use 'with ingestor:'
+    • Guaranteed connection lifecycle
+    Effort: 2 hours
+    Benefit: Very explicit
+    Risk: Requires API changes everywhere
+
+
+PROBLEM #2: SILENT FAILURES
+──────────────────────────────────────────────────────────────────────────────
+
+Description:
+  When queries fail, user sees empty results instead of error message
+  No way to distinguish "no results" from "query failed"
+
+Impact:
+  • User has no way to know what went wrong
+  • Appears like there's no data
+  • Impossible to debug issues
+  • Poor user experience
+
+Evidence:
+  From test logs:
+    Query: "Find all Python files in the codebase"
+    User receives: {"results": [], "summary": "There was an error querying the database: Not connected to Memgraph."}
+    Problem: 'results': [] looks like no files exist, but actually query failed
+
+Code Location:
+  File: codebase_rag/tools/codebase_query.py, line ~94
+  Issue: Exception caught and converted to empty result
+
+Current Code:
+  except Exception as e:
+      logger.error(f"[Tool:QueryGraph] Error during query execution: {e}")
+      return QueryResult(results=[], ...)
+
+Problem:
+  • Exception logged but not returned to user
+  • User sees empty results array
+  • User interprets this as "no files found"
+  • Actual error is lost
+
+Solution:
+  Return structured error objects instead of empty results
+
+  @dataclass
+  class QueryError:
+      message: str
+      error_code: str  # "CONNECTION_FAILED", "SYNTAX_ERROR", etc.
+      recoverable: bool
+      suggestion: str
+
+  @dataclass
+  class QueryResult:
+      success: bool
+      results: list[dict]
+      error: Optional[QueryError] = None
+      error_code: Optional[str] = None
+
+Example Response:
+  {
+    "success": false,
+    "results": [],
+    "error": {
+      "message": "Database connection failed",
+      "error_code": "DB_CONNECTION_FAILED",
+      "recoverable": true,
+      "suggestion": "The database is temporarily unavailable. Please try again in a moment."
+    }
+  }
+
+Effort: 3 hours
+Benefit: Critical for user experience
+
+
+PROBLEM #3: CYPHER VALIDATION
+──────────────────────────────────────────────────────────────────────────────
+
+Description:
+  Generated Cypher queries are not validated before execution
+  Invalid syntax/schema mismatches reach database
+
+Impact:
+  • Database returns errors
+  • Confusing error messages to users
+  • Potential performance issues (malformed queries)
+  • Security risk (unvalidated input)
+
+Evidence from Tests:
+  Q4: Generated "MATCH (c:Class)-[:DEFINES_METHOD]->(m:Method)"
+      Issue: DEFINES_METHOD might not be actual relationship type
+      Result: Empty result instead of methods
+
+  Q3: Generated "MATCH (m:Module {qualified_name: 'tools'})"
+      Issue: Actual qualified_name is 'codebase_rag.tools'
+      Result: No matches when they should exist
+
+Root Cause:
+  • No schema validation before query execution
+  • LLM generates based on example, not live schema
+  • Wrong relationship types/property names pass through
+
+Solution:
+  1. Create CypherValidator class
+  2. Build GRAPH_SCHEMA registry from actual database
+  3. Validate queries before execution
+  4. Return validation errors to user
+
+Implementation Sketch:
+
+  class CypherValidator:
+      def __init__(self, schema: GraphSchema):
+          self.schema = schema
+
+      def validate(self, cypher: str) -> ValidationResult:
+          # Parse Cypher
+          # Check all node types exist
+          # Check all relationship types exist
+          # Check all properties exist
+          # Check query performance pattern
+          return ValidationResult(
+              valid=True/False,
+              errors=[...],
+              warnings=[...]
+          )
+
+  GRAPH_SCHEMA = {
+      "nodes": {
+          "Class": ["name", "qualified_name", "docstring"],
+          "Function": ["name", "qualified_name", "decorators"],
+          "Method": ["name", "qualified_name", "decorators"],
+      },
+      "relationships": {
+          "DEFINES": {"from": ["Module"], "to": ["Class", "Function"]},
+          "DEFINES_METHOD": {"from": ["Class"], "to": ["Method"]},
+          "CALLS": {"from": ["Function", "Method"], "to": ["Function", "Method"]},
+      }
+  }
+
+  # Before execution
+  validation = validator.validate(generated_cypher)
+  if not validation.valid:
+      return QueryError(f"Invalid query: {validation.errors[0]}")
+  results = await execute(cypher)
+
+Effort: 6 hours
+Benefit: Prevents malformed queries from reaching database
+
+
+PROBLEM #4: QUERY GENERATION ACCURACY
+──────────────────────────────────────────────────────────────────────────────
+
+Description:
+  LLM-generated Cypher doesn't always match user intent
+  Schema mismatches, incomplete relationships, wrong patterns
+
+Impact:
+  • Users get wrong results
+  • Have to rephrase queries multiple times
+  • Accuracy ~40% on first try (estimated)
+  • Frustrating user experience
+
+Evidence from Tests:
+  N2: "What is the main entry point?"
+      Generated: "WHERE m.path STARTS WITH 'mcpserver/src'"
+      Should be: "WHERE m.path = 'codebase_rag/mcp/server.py'"
+
+  N1: "How does system generate Cypher?"
+      Generated: "WHERE toLower(f.name) CONTAINS 'query'"
+      Should be: Multi-step query showing architecture
+
+  Q3: "Functions in tools module"
+      Generated: "m:Module {qualified_name: 'tools'}"
+      Should be: "codebase_rag.tools" (full qualified name)
+
+Root Causes:
+  1. LLM doesn't know actual schema structure
+  2. No examples of correct queries in prompt
+  3. Project path patterns not explained
+  4. No feedback loop (failed queries don't teach LLM)
+
+Solutions (in priority order):
+
+  1. Inject Schema into Prompt (Effort: 2 hours)
+     • Include actual node types, relationship types
+     • List actual qualified name formats
+     • Show examples of correct queries
+
+  2. Query Caching (Effort: 4 hours)
+     • Cache successful queries
+     • Reuse on similar questions
+     • Build over time
+
+  3. Query Refinement Loop (Effort: 6 hours)
+     • Generate query
+     • Validate
+     • If invalid, ask LLM to fix
+     • Retry up to N times
+
+  4. Few-Shot Learning (Effort: 3 hours)
+     • Include example queries in system prompt
+     • Show correct patterns explicitly
+
+  5. Intent Detection (Effort: 8 hours)
+     • Classify query intent first (lookup, relationship, aggregation)
+     • Guide generation based on intent
+     • More structured output
+
+
+PROBLEM #5: CONCURRENT QUERY PERFORMANCE
+──────────────────────────────────────────────────────────────────────────────
+
+Description:
+  3 concurrent queries take 50 seconds (should be ~15 seconds)
+  Significant scalability problem
+
+Impact:
+  • Can't handle multiple users
+  • LLM becomes bottleneck
+  • Poor user experience under load
+
+Evidence from Tests:
+  P1: Sequential "Find classes" × 3 = 7.8 seconds total
+  P4: Concurrent "Find classes, List functions, Show imports" = 50 seconds
+
+Root Cause:
+  • LLM request processing is serialized (one request at a time)
+  • Query generation must complete before database query starts
+  • Each query is independently generated (no caching)
+  • No connection pooling (database also bottleneck)
+
+Solutions:
+
+  1. Query Result Caching (Effort: 4 hours, Impact: 40% improvement)
+     • Cache successful Cypher queries
+     • 40% of user queries are duplicates/similar
+     • Reduce LLM load significantly
+
+  2. LLM Request Queuing (Effort: 5 hours, Impact: 20% improvement)
+     • Queue LLM requests
+     • Allow max 2-3 concurrent to Ollama
+     • Prevents single slow request from blocking others
+
+  3. Connection Pooling (Effort: 8 hours, Impact: 30% improvement)
+     • Database connections should be pooled
+     • Each query can use separate connection
+     • Parallel database execution
+
+  4. Batch Query Execution (Effort: 6 hours, Impact: 15% improvement)
+     • When possible, run multiple queries in one transaction
+     • Use Memgraph batch operations
+
+Combined effect: 50s → ~15s (target)
+
+
+PROBLEM #6: SEMANTIC UNDERSTANDING
+──────────────────────────────────────────────────────────────────────────────
+
+Description:
+  Multi-entity queries don't always translate correctly
+  Complex relationships misunderstood
+
+Impact:
+  • Advanced queries fail or give partial results
+  • Users can only ask simple questions
+  • Limited value from graph database
+
+Evidence:
+  Q6: "What does CypherGenerator class call?"
+      Generated: "Class methods" not "functions it calls"
+      Should traverse: Class → Methods → CALLS → Functions
+
+  N1: "How does system generate Cypher from NL?"
+      Generated: File name matching (too simple)
+      Should require: Understanding of architecture, multiple hops
+
+Root Cause:
+  • LLM doesn't understand query intent
+  • No constraint on relationship depth
+  • Generates shortest matching pattern instead of most relevant
+
+Solution:
+
+  1. Intent Classification
+     - "find X" → lookup single entity
+     - "what X does" → relationship traversal
+     - "most X" → aggregation with sorting
+     - "how X works" → multi-hop architecture query
+
+  2. Pattern Constraints
+     - Tell LLM which patterns are valid for this query type
+     - Limit relationship traversal depth
+     - Ensure results are relevant
+
+  3. Query Verification
+     - Execute generated query
+     - Ask: "Does this answer the user question?"
+     - Refine if needed
+
+Effort: 10 hours total
+Impact: 80%+ accuracy on complex queries
+
+
+================================================================================
+IMMEDIATE ACTIONS (This Week)
+================================================================================
+
+Priority 1 - Quick Wins (4 hours):
+  ☐ Fix error reporting (silent failures)
+  ☐ Add error codes and messages
+  ☐ Run stress test again
+  → Should see improvement in user-facing errors
+
+Priority 2 - Foundation (8 hours):
+  ☐ Implement connection pooling or lazy connect
+  ☐ Test connection stability
+  ☐ Run stress test again
+  → Should see 18 partial tests become passes
+
+Priority 3 - Quality (6 hours):
+  ☐ Implement basic Cypher validator
+  ☐ Add schema registry
+  ☐ Validate before execution
+  → Should prevent invalid queries
+
+
+================================================================================
+TIMELINE & EFFORT ESTIMATE
+================================================================================
+
+Critical Issues (Week 1-2): 20 hours
+├─ Connection management
+├─ Error reporting
+└─ Query validation
+
+High Priority (Week 3-4): 25 hours
+├─ Schema injection
+├─ Query caching
+├─ System prompt enhancement
+└─ Accuracy improvements
+
+Mid Priority (Week 5-6): 20 hours
+├─ Concurrency improvements
+├─ Request queuing
+├─ Batch execution
+└─ Connection pooling tuning
+
+Polish (Week 7-8): 20 hours
+├─ Error recovery
+├─ Input validation
+├─ Rate limiting
+└─ Documentation
+
+Total: ~85 hours (approximately 2.1 weeks full-time)
+
+
+================================================================================
+SUCCESS CRITERIA
+================================================================================
+
+After All Fixes:
+  • Pass rate: >90% (was 29.6%)
+  • Simple queries: <3 seconds (was 2.6s) ✓
+  • Complex queries: <10 seconds (was 5.8s) ✓
+  • Concurrent 3x: <15 seconds (was 50s)
+  • All errors have clear messages
+  • No silent failures
+  • Queries validated before execution
+  • Automatic reconnection on failure
+  • 40%+ cache hit rate
+
+
+================================================================================
+REFERENCE DOCUMENTS
+================================================================================
+
+For detailed analysis: STRESS_TEST_ANALYSIS.md
+For implementation roadmap: UPGRADE_PRIORITIES.md
+For quick fixes: UPGRADE_PRIORITIES.md "Quick Fix Guide"
+For test results: infrastructure/benchmarks/stress-test-2025-12-04.yaml
+

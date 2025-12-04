@@ -1,0 +1,3 @@
+# Benchmark results directory
+# Stress test results are saved here as YAML files
+# Format: stress-test-YYYY-MM-DD.yaml

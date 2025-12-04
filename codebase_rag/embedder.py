@@ -1,59 +1,64 @@
 # codebase_rag/embedder.py
+"""Code embedding using Ollama's nomic-embed-code model on inference server."""
 import functools
+import json
+from typing import Any
 
-from .utils.dependencies import has_torch, has_transformers
+import requests
 
-if has_torch() and has_transformers():
-    import numpy as np
-    import torch
-    from numpy.typing import NDArray
 
-    from .unixcoder import UniXcoder
+@functools.lru_cache(maxsize=1)
+def get_ollama_config() -> dict[str, str]:
+    """Get Ollama configuration for inference server.
 
-    @functools.lru_cache(maxsize=1)
-    def get_model() -> UniXcoder:
-        """Get or create UniXcoder model instance with singleton pattern via LRU cache.
+    Returns:
+        Dict with endpoint URL and model name
+    """
+    return {
+        "endpoint": "http://192.168.0.121:11434",
+        "model": "manutic/nomic-embed-code:7b-q8_0",
+    }
 
-        This approach provides:
-        - Singleton behavior without global variables
-        - Thread-safe lazy initialization
-        - Easy testability with cache_clear() method
-        - Memory efficient with maxsize=1
 
-        Returns:
-            UniXcoder model instance configured for inference
-        """
-        model = UniXcoder("microsoft/unixcoder-base")
-        model.eval()
-        if torch.cuda.is_available():
-            model = model.cuda()
-        return model
+def embed_code(code: str, max_length: int = 512) -> list[float]:
+    """Generate code embedding using nomic-embed-code via Ollama API.
 
-    def embed_code(code: str, max_length: int = 512) -> list[float]:
-        """Generate code embedding using UniXcoder.
+    Args:
+        code: Source code to embed
+        max_length: Maximum token length for input (not used with Ollama, kept for compatibility)
 
-        Args:
-            code: Source code to embed
-            max_length: Maximum token length for input
+    Returns:
+        3584-dimensional embedding as list of floats
 
-        Returns:
-            768-dimensional embedding as list of floats
-        """
-        model = get_model()
-        device = next(model.parameters()).device
-        tokens = model.tokenize([code], max_length=max_length)
-        tokens_tensor = torch.tensor(tokens).to(device)
-        with torch.no_grad():
-            # Forward returns (token_embeddings, sentence_embeddings)
-            _, sentence_embeddings = model(tokens_tensor)
-            embedding: NDArray[np.float32] = sentence_embeddings.cpu().numpy()
-        # Extract 1D array and convert to list - numpy type stubs are imprecise for tolist()
-        result: list[float] = embedding[0].tolist()
-        return result
+    Raises:
+        RuntimeError: If the Ollama API request fails
+    """
+    config = get_ollama_config()
+    endpoint = config["endpoint"]
+    model = config["model"]
 
-else:
+    # Ollama embedding API endpoint
+    url = f"{endpoint}/api/embeddings"
 
-    def embed_code(code: str, max_length: int = 512) -> list[float]:
+    payload = {
+        "model": model,
+        "prompt": code,
+    }
+
+    try:
+        response = requests.post(url, json=payload, timeout=30)
+        response.raise_for_status()
+        result = response.json()
+
+        # Ollama returns embeddings in the "embedding" field
+        embedding: list[float] = result["embedding"]
+        return embedding
+
+    except requests.exceptions.RequestException as e:
         raise RuntimeError(
-            "Semantic search requires 'semantic' extra: uv sync --extra semantic"
-        )
+            f"Failed to generate embedding via Ollama API at {endpoint}: {e}"
+        ) from e
+    except (KeyError, json.JSONDecodeError) as e:
+        raise RuntimeError(
+            f"Invalid response from Ollama API at {endpoint}: {e}"
+        ) from e

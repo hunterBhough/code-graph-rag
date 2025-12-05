@@ -52,12 +52,8 @@ watch: ## Watch repository for changes and update graph in real-time
 		--port $(or $(PORT),7687) \
 		$(if $(BATCH_SIZE),--batch-size $(BATCH_SIZE),)
 
-publish: install ## Register as user-level MCP server for Claude Code
-	@echo "📦 Publishing code-graph-rag to user-level MCP servers..."
-	-claude mcp remove code-graph --scope user 2>/dev/null || true
-	claude mcp add code-graph --scope user -- uv run --directory $(CURDIR) graph-code mcp-server
+publish: install ## Install dependencies (publish target removed - use project-specific MCP config)
+	@echo "✅ Dependencies installed"
 	@echo ""
-	@echo "✅ Published successfully!"
-	@echo "Restart Claude Code to use the updated code-graph server."
-	@echo ""
-	@echo "Note: The MCP server inherits TARGET_REPO_PATH from Claude Code's working directory."
+	@echo "Note: This MCP server should be configured per-project in .code-graph/mcp_config.json"
+	@echo "It is no longer registered as a user-level MCP server."

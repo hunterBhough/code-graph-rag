@@ -24,3 +24,8 @@ wheels/
 
 # Infrastructure logs (can be large)
 infrastructure/logs/*.log
+
+# Speckit - only track constitution
+.specify/
+!.specify/memory/
+!.specify/memory/constitution.md

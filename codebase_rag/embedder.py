@@ -1,5 +1,5 @@
 # codebase_rag/embedder.py
-"""Code embedding using Ollama's nomic-embed-code model on inference server."""
+"""Code embedding using TEI (Text Embeddings Inference) with bge-m3 model."""
 import functools
 import json
 from typing import Any
@@ -8,41 +8,40 @@ import requests
 
 
 @functools.lru_cache(maxsize=1)
-def get_ollama_config() -> dict[str, str]:
-    """Get Ollama configuration for inference server.
+def get_embedding_config() -> dict[str, str]:
+    """Get embedding configuration for TEI inference server.
 
     Returns:
         Dict with endpoint URL and model name
     """
     return {
-        "endpoint": "http://192.168.0.121:11434",
-        "model": "manutic/nomic-embed-code:7b-q8_0",
+        "endpoint": "http://192.168.0.121:8081",
+        "model": "bge-m3",
     }
 
 
 def embed_code(code: str, max_length: int = 512) -> list[float]:
-    """Generate code embedding using nomic-embed-code via Ollama API.
+    """Generate code embedding using bge-m3 via TEI API.
 
     Args:
         code: Source code to embed
-        max_length: Maximum token length for input (not used with Ollama, kept for compatibility)
+        max_length: Maximum token length for input (not used with TEI, kept for compatibility)
 
     Returns:
-        3584-dimensional embedding as list of floats
+        1024-dimensional embedding as list of floats
 
     Raises:
-        RuntimeError: If the Ollama API request fails
+        RuntimeError: If the TEI API request fails
     """
-    config = get_ollama_config()
+    config = get_embedding_config()
     endpoint = config["endpoint"]
     model = config["model"]
 
-    # Ollama embedding API endpoint
-    url = f"{endpoint}/api/embeddings"
+    # TEI embedding API endpoint
+    url = f"{endpoint}/embed"
 
     payload = {
-        "model": model,
-        "prompt": code,
+        "inputs": [code],
     }
 
     try:
@@ -50,15 +49,15 @@ def embed_code(code: str, max_length: int = 512) -> list[float]:
         response.raise_for_status()
         result = response.json()
 
-        # Ollama returns embeddings in the "embedding" field
-        embedding: list[float] = result["embedding"]
+        # TEI returns a list of embeddings, we take the first one
+        embedding: list[float] = result[0]
         return embedding
 
     except requests.exceptions.RequestException as e:
         raise RuntimeError(
-            f"Failed to generate embedding via Ollama API at {endpoint}: {e}"
+            f"Failed to generate embedding via TEI API at {endpoint}: {e}"
         ) from e
-    except (KeyError, json.JSONDecodeError) as e:
+    except (KeyError, json.JSONDecodeError, IndexError) as e:
         raise RuntimeError(
-            f"Invalid response from Ollama API at {endpoint}: {e}"
+            f"Invalid response from TEI API at {endpoint}: {e}"
         ) from e

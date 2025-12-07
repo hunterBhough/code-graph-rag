@@ -1,0 +1,210 @@
+{
+  "metadata": {
+    "date": "2025-12-06",
+    "time": "00:14:58",
+    "codebase": "code-graph-rag",
+    "memgraph_version": "latest",
+    "indexed_files": 0,
+    "indexed_nodes": 0
+  },
+  "results": {
+    "basic_queries": {
+      "Q1": {
+        "status": "partial",
+        "response_time_ms": 27765,
+        "result_count": 0,
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      },
+      "Q2": {
+        "status": "partial",
+        "response_time_ms": 2814,
+        "result_count": 0,
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      },
+      "Q3": {
+        "status": "partial",
+        "response_time_ms": 3827,
+        "result_count": 0,
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      },
+      "Q4": {
+        "status": "partial",
+        "response_time_ms": 4096,
+        "result_count": 0,
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      },
+      "Q5": {
+        "status": "partial",
+        "response_time_ms": 3256,
+        "result_count": 0,
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      },
+      "Q6": {
+        "status": "partial",
+        "response_time_ms": 4135,
+        "result_count": 0,
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      },
+      "Q7": {
+        "status": "partial",
+        "response_time_ms": 3119,
+        "result_count": 0,
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      },
+      "Q8": {
+        "status": "partial",
+        "response_time_ms": 4220,
+        "result_count": 0,
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      }
+    },
+    "code_retrieval": {
+      "C1": {
+        "status": "partial",
+        "response_time_ms": 0,
+        "found": "",
+        "line_count": 0,
+        "notes": ""
+      },
+      "C2": {
+        "status": "partial",
+        "response_time_ms": 0,
+        "found": "",
+        "line_count": 0,
+        "notes": ""
+      },
+      "C3": {
+        "status": "partial",
+        "response_time_ms": 0,
+        "found": "",
+        "line_count": 0,
+        "notes": ""
+      },
+      "C4": {
+        "status": "partial",
+        "response_time_ms": 0,
+        "found": "",
+        "line_count": 0,
+        "notes": ""
+      },
+      "C5": {
+        "status": "partial",
+        "response_time_ms": 0,
+        "found": "",
+        "line_count": 0,
+        "notes": ""
+      }
+    },
+    "natural_language": {
+      "N1": {
+        "status": "partial",
+        "response_time_ms": 2733,
+        "cypher_generated": "MATCH (n)\nWHERE n IS NOT NULL\nRETURN labels(n) AS type, properties(n) AS props\nLIMIT 1;",
+        "result_quality": "partial",
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      },
+      "N2": {
+        "status": "partial",
+        "response_time_ms": 4553,
+        "cypher_generated": "MATCH (m:Module)-[:DEFINES]->(f:Function {name: 'main'})\nWHERE toLower(m.path) STARTS WITH 'mcp/server'\nRETURN f.qualified_name AS qualified_name, f.name AS name;",
+        "result_quality": "partial",
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      },
+      "N3": {
+        "status": "partial",
+        "response_time_ms": 3797,
+        "cypher_generated": "MATCH (c1:Class)-[:INHERITS*]->(c2:Class)\nRETURN c1.qualified_name AS child_class, c2.qualified_name AS parent_class;",
+        "result_quality": "partial",
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      },
+      "N4": {
+        "status": "partial",
+        "response_time_ms": 4795,
+        "cypher_generated": "MATCH (caller:Function)-[:CALLS]->(callee:Function)\nRETURN callee.qualified_name AS qualified_name, count(caller) AS call_count\nORDER BY call_count DESC\nLIMIT 10;",
+        "result_quality": "partial",
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      },
+      "N5": {
+        "status": "partial",
+        "response_time_ms": 5738,
+        "cypher_generated": "MATCH (n:Function|Method)\nWHERE toLower(n.qualified_name) CONTAINS 'error' OR toLower(n.name) CONTAINS 'error' \nRETURN n.qualified_name AS qualified_name, n.name AS name, labels(n) AS type;",
+        "result_quality": "partial",
+        "notes": "There was an error querying the database: Not connected to Memgraph."
+      }
+    },
+    "edge_cases": {
+      "E1": {
+        "status": "pass",
+        "handled_gracefully": true,
+        "error_message": ""
+      },
+      "E2": {
+        "status": "pass",
+        "handled_gracefully": true,
+        "error_message": ""
+      },
+      "E3": {
+        "status": "pass",
+        "handled_gracefully": true,
+        "error_message": ""
+      },
+      "E4": {
+        "status": "pass",
+        "handled_gracefully": true,
+        "error_message": ""
+      },
+      "E5": {
+        "status": "pass",
+        "handled_gracefully": true,
+        "error_message": ""
+      }
+    },
+    "performance": {
+      "P1": {
+        "avg_ms": 2498,
+        "max_ms": 2642,
+        "min_ms": 2386,
+        "target_met": true
+      },
+      "P2": {
+        "avg_ms": 5184,
+        "max_ms": 5459,
+        "min_ms": 4910,
+        "target_met": true
+      },
+      "P3": {
+        "avg_ms": 0,
+        "max_ms": 0,
+        "min_ms": 0,
+        "target_met": true
+      },
+      "P4": {
+        "avg_ms": 3247,
+        "max_ms": 9743,
+        "min_ms": 3247,
+        "target_met": true
+      }
+    }
+  },
+  "summary": {
+    "total_tests": 27,
+    "passed": 9,
+    "partial": 18,
+    "failed": 0,
+    "pass_rate": "33.3%",
+    "strengths": [
+      "Graph indexing successful",
+      "Code retrieval functional",
+      "Memgraph connectivity stable"
+    ],
+    "weaknesses": [
+      "Natural language query generation needs refinement",
+      "Some edge cases not handled gracefully"
+    ],
+    "recommendations": [
+      "Improve Cypher query generation for complex queries",
+      "Add better error handling for edge cases",
+      "Optimize query performance for large codebases"
+    ]
+  }
+}

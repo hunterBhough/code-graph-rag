@@ -15,3 +15,8 @@ projects:
 	  group: "bible-vault"
 	  databases: [codegraph_bible-search-tool, codegraph_bible-vault]
 	  initialized_at: 2025-12-04T15:55:00
+	- name: claude-conductor
+	  path: /Users/hunter/code/ai_agency/brain/claude-conductor
+	  group: ""
+	  databases: [codegraph_claude-conductor]
+	  initialized_at: 2025-12-05T06:42:36

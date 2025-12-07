@@ -75,9 +75,9 @@ class AppConfig(BaseSettings):
     SHELL_COMMAND_TIMEOUT: int = 30
 
     # Embedding settings
-    EMBEDDING_ENDPOINT: str = "http://192.168.0.121:11434"  # Inference server
-    EMBEDDING_MODEL: str = "manutic/nomic-embed-code:7b-q8_0"  # Code embedding model
-    EMBEDDING_DIMENSIONS: int = 3584  # nomic-embed-code dimensions
+    EMBEDDING_ENDPOINT: str = "http://192.168.0.121:8081"  # TEI inference server
+    EMBEDDING_MODEL: str = "bge-m3"  # Code embedding model
+    EMBEDDING_DIMENSIONS: int = 1024  # bge-m3 dimensions
     EMBEDDING_BATCH_SIZE: int = 10  # Number of embeddings per batch
     EMBEDDING_BATCH_DELAY: float = 0.5  # Seconds to sleep between batches
     EMBEDDING_ENABLED: bool = True  # Set to False to disable semantic embeddings entirely

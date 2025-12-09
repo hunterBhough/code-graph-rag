@@ -30,7 +30,7 @@ The `MemgraphIngestor` object created in test/runtime scenarios loses database c
 **Evidence from Tests:**
 ```
 ERROR: "Not connected to Memgraph" on all database queries
-✓ Memgraph running: docker ps shows code-graph-rag-memgraph-1 UP
+✓ Memgraph running: docker ps shows codebase-intelligence-memgraph UP
 ✓ Indexing worked: mcp__code-graph__index_repository succeeded
 ✗ Queries fail: Same ingestor instance can't query
 ```

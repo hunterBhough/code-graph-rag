@@ -4,6 +4,8 @@
 # - vector-search-mcp (semantic code search)
 # - docwell (document search)
 
+name: codebase-intelligence
+
 services:
   memgraph:
     image: memgraph/memgraph-mage

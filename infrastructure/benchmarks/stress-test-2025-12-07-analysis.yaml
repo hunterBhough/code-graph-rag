@@ -253,7 +253,7 @@ recommendations:
 
     - action: "Verify Memgraph database exists"
       command: |
-        docker exec -it code-graph-rag-memgraph-1 mgconsole
+        docker exec -it codebase-intelligence-memgraph mgconsole
         SHOW DATABASES;
         USE DATABASE codegraph_code-graph-rag;
         MATCH (n) RETURN count(n);

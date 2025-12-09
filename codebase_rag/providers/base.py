@@ -12,6 +12,13 @@ from pydantic_ai.providers.google_gla import GoogleGLAProvider
 from pydantic_ai.providers.google_vertex import GoogleVertexProvider, VertexAiRegion
 from pydantic_ai.providers.openai import OpenAIProvider as PydanticOpenAIProvider
 
+try:
+    from pydantic_ai.models.anthropic import AnthropicModel
+    from pydantic_ai.providers.anthropic import AnthropicProvider as PydanticAnthropicProvider
+    HAS_ANTHROPIC = True
+except ImportError:
+    HAS_ANTHROPIC = False
+
 
 class ModelProvider(ABC):
     """Abstract base class for all model providers."""
@@ -159,11 +166,46 @@ class OllamaProvider(ModelProvider):
         return OpenAIModel(model_id, provider=provider, **kwargs)  # type: ignore
 
 
+class AnthropicProvider(ModelProvider):
+    """Anthropic Claude provider."""
+
+    def __init__(
+        self,
+        api_key: str | None = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.api_key = api_key
+
+    @property
+    def provider_name(self) -> str:
+        return "anthropic"
+
+    def validate_config(self) -> None:
+        if not self.api_key:
+            raise ValueError(
+                "Anthropic provider requires api_key. "
+                "Set ANTHROPIC_API_KEY or CYPHER_API_KEY in environment."
+            )
+        if not HAS_ANTHROPIC:
+            raise ValueError(
+                "Anthropic support not available. "
+                "Install with: uv add 'pydantic-ai[anthropic]'"
+            )
+
+    def create_model(self, model_id: str, **kwargs: Any) -> Any:
+        self.validate_config()
+
+        provider = PydanticAnthropicProvider(api_key=self.api_key)
+        return AnthropicModel(model_id, provider=provider, **kwargs)
+
+
 # Provider registry
 PROVIDER_REGISTRY: dict[str, type[ModelProvider]] = {
     "google": GoogleProvider,
     "openai": OpenAIProvider,
     "ollama": OllamaProvider,
+    "anthropic": AnthropicProvider,
 }
 
 

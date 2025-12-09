@@ -21,6 +21,7 @@ dependencies = [
     "diff-match-patch>=20241021",
     "click>=8.0.0",
     "pytest-xdist>=3.8.0",
+    "pydantic-ai[anthropic]>=1.28.0",
 ]
 
 [project.scripts]

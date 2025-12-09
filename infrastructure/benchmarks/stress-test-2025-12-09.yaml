@@ -1,0 +1,362 @@
+metadata:
+  date: '2025-12-09'
+  time: '12:30:17'
+  project_name: ai-gateway-mcp
+  indexed_nodes: 15843
+  available_tools: 14
+  test_focus: Structural graph queries only (no NL/semantic/vector search)
+  memgraph_host: localhost
+  memgraph_port: 7687
+results:
+  structural_queries:
+    S1:
+      status: pass
+      response_time_ms: 4
+      result_count: 0
+      performance_target_met: true
+      notes: Found 0 callers in 4ms
+    S2:
+      status: pass
+      response_time_ms: 8
+      result_count: 0
+      performance_target_met: true
+      notes: Multi-level traversal found 0 callers in 8ms
+    S3:
+      status: pass
+      response_time_ms: 3
+      result_count: 3
+      performance_target_met: true
+      notes: Found 3 descendants in 3ms
+    S4:
+      status: pass
+      response_time_ms: 4
+      result_count: 0
+      performance_target_met: true
+      notes: Found 0 ancestors in 4ms
+    S5:
+      status: pass
+      response_time_ms: 6
+      result_count: 3
+      performance_target_met: true
+      notes: Bidirectional traversal found 3 classes in 6ms
+    S6:
+      status: pass
+      response_time_ms: 3
+      result_count: 0
+      performance_target_met: true
+      notes: Found 0 import dependencies in 3ms
+    S7:
+      status: pass
+      response_time_ms: 1
+      result_count: 7
+      performance_target_met: true
+      notes: Found 7 call dependencies in 1ms
+    S8:
+      status: pass
+      response_time_ms: 5
+      result_count: 0
+      performance_target_met: true
+      notes: Found 0 total dependencies in 5ms
+    S9:
+      status: pass
+      response_time_ms: 2
+      result_count: 3
+      performance_target_met: true
+      notes: Found 3 direct implementations in 2ms
+    S10:
+      status: pass
+      response_time_ms: 3
+      result_count: 3
+      performance_target_met: true
+      notes: Found 3 total implementations (including indirect) in 3ms
+    S11:
+      status: pass
+      response_time_ms: 1
+      result_count: 6
+      performance_target_met: true
+      notes: Found 6 public exports in 1ms
+    S12:
+      status: pass
+      response_time_ms: 2
+      result_count: 6
+      performance_target_met: true
+      notes: Found 6 total exports (including private) in 2ms
+    S13:
+      status: pass
+      response_time_ms: 1
+      result_count: 15
+      performance_target_met: true
+      notes: Generated call graph with 15 nodes in 1ms
+    S14:
+      status: pass
+      response_time_ms: 1
+      result_count: 24
+      performance_target_met: true
+      notes: Generated deep call graph with 24 nodes in 1ms
+    S15:
+      status: pass
+      response_time_ms: 1
+      result_count: 10
+      performance_target_met: true
+      notes: Custom Cypher query returned 10 results in 1ms
+    S16:
+      status: pass
+      response_time_ms: 1
+      result_count: 0
+      performance_target_met: true
+      notes: Complex Cypher query returned 0 results in 1ms
+  parameter_validation:
+    P1:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: max_depth must be between 1 and 5 (got 999)
+      notes: Max depth validation (should reject values > 5)
+    P2:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: max_depth must be between 1 and 5 (got -1)
+      notes: Negative max_depth validation
+    P3:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: '''NoneType'' object has no attribute ''split'''
+      notes: None parameter correctly rejected
+    P4:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: Function '' not found in code graph.
+      notes: Empty string parameter validation
+    P5:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: Invalid direction parameter. Must be "up", "down", or "both"
+        (got "sideways")
+      notes: Invalid direction parameter validation
+    P6:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: max_depth must be between 1 and 10 (got 100)
+      notes: Max depth validation for hierarchy (should reject > 10)
+    P7:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      notes: Invalid dependency_type parameter (may pass Python type checking)
+    P8:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: max_nodes must be between 1 and 100 (got -10)
+      notes: Negative max_nodes validation
+    P9:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: max_depth must be between 1 and 5 (got 0)
+      notes: Zero max_depth validation
+    P10:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: Query cannot be empty
+      notes: Empty Cypher query validation
+    P11:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: Destructive operation 'DELETE' is not allowed in expert mode
+      notes: DELETE operation should be forbidden
+    P12:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: SET operations are not allowed in expert mode (read-only)
+      notes: SET operation should be forbidden
+    P13:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: Destructive operation 'CREATE' is not allowed in expert mode
+      notes: CREATE operation should be forbidden
+    P14:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: MERGE operations are not allowed in expert mode (read-only)
+      notes: MERGE operation should be forbidden
+    P15:
+      status: pass
+      response_time_ms: 0
+      error_handled: true
+      notes: Malformed Cypher syntax should be caught
+  edge_cases:
+    E1:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: Function 'ai-gateway-mcp.nonexistent.module.fake_function' not
+        found in code graph.
+      has_suggestion: true
+      notes: Non-existent function should return clear error
+    E2:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: Class 'ai-gateway-mcp.nonexistent.FakeClass' not found in code
+        graph.
+      notes: Non-existent class should return clear error
+    E3:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      error_message: Module/Function 'ai-gateway-mcp.nonexistent.module' not found
+        in code graph.
+      notes: Non-existent module should return clear error
+    E4:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      has_results: true
+      result_count: 3
+      notes: Empty result should be handled gracefully
+    E5:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      truncated: false
+      row_count: 200
+      total_count: 200
+      notes: 'Truncation test - truncated: False'
+    E6:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      has_circular_detection: true
+      circular_deps: []
+      notes: Should have circular dependency detection
+    E7:
+      status: pass
+      response_time_ms: 0
+      error_handled: true
+      notes: Special characters handled gracefully
+    E8:
+      status: pass
+      response_time_ms: 0
+      handled_gracefully: true
+      result_count: 0
+      notes: Deep traversal (depth=5) returned 0 results
+  performance:
+    PERF1:
+      status: pass
+      avg_ms: 1
+      max_ms: 1
+      min_ms: 1
+      target_met: true
+      notes: Simple query should complete in <50ms
+    PERF2:
+      status: pass
+      avg_ms: 9
+      max_ms: 9
+      min_ms: 9
+      target_met: true
+      notes: Complex traversal should complete in <150ms
+    PERF3:
+      status: pass
+      avg_ms: 3
+      max_ms: 6
+      min_ms: 3
+      target_met: true
+      notes: Code snippet retrieval should complete in <30ms
+    PERF4:
+      status: pass
+      avg_ms: 1
+      max_ms: 2
+      min_ms: 1
+      target_met: true
+      notes: Call graph generation should complete in <200ms
+    PERF5:
+      status: pass
+      avg_ms: 1
+      max_ms: 2
+      min_ms: 1
+      target_met: true
+      notes: Custom Cypher query should complete in <50ms
+    PERF6:
+      status: pass
+      avg_ms: 1
+      total_ms: 8
+      target_met: true
+      notes: 5 sequential queries completed in 8ms (avg 1ms)
+  concurrent_operations:
+    CONC1:
+      status: pass
+      response_time_ms: 9
+      successful_queries: 3
+      total_queries: 3
+      notes: 3/3 concurrent queries succeeded in 9ms
+    CONC2:
+      status: pass
+      response_time_ms: 15
+      successful_queries: 3
+      total_queries: 3
+      notes: 'Mixed concurrent execution: 3/3 in 15ms'
+    CONC3:
+      status: pass
+      response_time_ms: 16
+      successful_queries: 10
+      total_queries: 10
+      avg_time_per_query: 1
+      notes: 'High load: 10/10 succeeded in 16ms'
+    CONC4:
+      status: pass
+      response_time_ms: 28
+      successful_queries: 5
+      total_queries: 5
+      notes: 'Variable depth queries: 5/5 in 28ms'
+    CONC5:
+      status: pass
+      response_time_ms: 88
+      successful_queries: 20
+      total_queries: 20
+      avg_time_per_query: 4
+      notes: 'Extreme load: 20/20 succeeded in 88ms'
+summary:
+  total_tests: 50
+  passed: 50
+  partial: 0
+  failed: 0
+  pass_rate: 100.0%
+  execution_time_seconds: 0.389258
+  test_categories:
+    structural_queries:
+      total: 16
+      passed: 16
+      performance_targets_met: 16
+    parameter_validation:
+      total: 15
+      passed: 15
+    edge_cases:
+      total: 8
+      passed: 8
+    performance:
+      total: 6
+      targets_met: 6
+    concurrent_operations:
+      total: 5
+      passed: 5
+  strengths:
+  - 'Excellent structural query reliability: 16/16 passed'
+  - 'Strong performance: 16/16 met timing targets'
+  - 'Robust parameter validation: 15/15 passed'
+  - 'Excellent edge case handling: 8/8 passed'
+  - 'Strong concurrent operation support: 5/5 passed'
+  weaknesses:
+  - No significant weaknesses detected - system is production-ready
+  recommendations:
+  - System is performing well - continue monitoring and maintain test coverage

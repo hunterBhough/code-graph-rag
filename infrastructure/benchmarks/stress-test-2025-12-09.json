@@ -1,8 +1,8 @@
 {
   "metadata": {
     "date": "2025-12-09",
-    "time": "02:31:34",
-    "codebase": "code-graph-rag",
+    "time": "09:20:33",
+    "codebase": "ai-gateway-mcp",
     "memgraph_version": "latest",
     "indexed_files": 0,
     "indexed_nodes": 0
@@ -11,85 +11,73 @@
     "basic_queries": {
       "Q1": {
         "status": "pass",
-        "response_time_ms": 20336,
-        "result_count": 212,
-        "notes": "Successfully retrieved 212 item(s) from the graph."
+        "response_time_ms": 20864,
+        "result_count": 220,
+        "notes": "Successfully retrieved 220 item(s) from the graph."
       },
       "Q2": {
         "status": "pass",
-        "response_time_ms": 2623,
-        "result_count": 119,
-        "notes": "Successfully retrieved 119 item(s) from the graph."
+        "response_time_ms": 2619,
+        "result_count": 130,
+        "notes": "Successfully retrieved 130 item(s) from the graph."
       },
       "Q3": {
         "status": "partial",
-        "response_time_ms": 4067,
+        "response_time_ms": 3638,
         "result_count": 0,
         "notes": "Successfully retrieved 0 item(s) from the graph."
       },
       "Q4": {
         "status": "pass",
-        "response_time_ms": 3995,
-        "result_count": 11,
-        "notes": "Successfully retrieved 11 item(s) from the graph."
+        "response_time_ms": 3905,
+        "result_count": 7,
+        "notes": "Successfully retrieved 7 item(s) from the graph."
       },
       "Q5": {
         "status": "partial",
-        "response_time_ms": 3170,
+        "response_time_ms": 4175,
         "result_count": 0,
         "notes": "Successfully retrieved 0 item(s) from the graph."
       },
       "Q6": {
         "status": "partial",
-        "response_time_ms": 3561,
-        "result_count": 0,
-        "notes": "Successfully retrieved 0 item(s) from the graph."
-      },
-      "Q7": {
-        "status": "partial",
-        "response_time_ms": 3030,
-        "result_count": 0,
-        "notes": "Successfully retrieved 0 item(s) from the graph."
-      },
-      "Q8": {
-        "status": "partial",
-        "response_time_ms": 3778,
+        "response_time_ms": 3534,
         "result_count": 0,
         "notes": "Successfully retrieved 0 item(s) from the graph."
       }
     },
     "code_retrieval": {
       "C1": {
-        "status": "partial",
-        "response_time_ms": 3,
-        "found": "",
-        "line_count": 0,
+        "status": "pass",
+        "response_time_ms": 13,
+        "found": "codebase_rag/tests/test_rust_advanced_types.py",
+        "line_count": 1,
         "notes": ""
       },
       "C2": {
-        "status": "partial",
-        "response_time_ms": 0,
-        "found": "",
-        "line_count": 0,
+        "status": "pass",
+        "response_time_ms": 8,
+        "found": "codebase_rag/tests/test_rust_advanced_types.py",
+        "line_count": 1,
         "notes": ""
       },
       "C3": {
-        "status": "partial",
-        "response_time_ms": 0,
-        "found": "",
-        "line_count": 0,
+        "status": "pass",
+        "response_time_ms": 3,
+        "found": "codebase_rag/tests/test_rust_advanced_types.py",
+        "line_count": 1,
         "notes": ""
       },
       "C4": {
-        "status": "partial",
-        "response_time_ms": 0,
-        "found": "",
-        "line_count": 0,
+        "status": "pass",
+        "response_time_ms": 4,
+        "found": "codebase_rag/tests/test_rust_advanced_types.py",
+        "line_count": 1,
         "notes": ""
       },
       "C5": {
         "status": "partial",
-        "response_time_ms": 0,
+        "response_time_ms": 2,
         "found": "",
         "line_count": 0,
         "notes": ""
@@ -98,85 +86,85 @@
     "natural_language": {
       "N1": {
         "status": "partial",
-        "response_time_ms": 3690,
-        "cypher_generated": "MATCH (f:File) WHERE toLower(f.name) CONTAINS 'system' AND f.path STARTS WITH 'system/src' RETURN f.path AS path, f.name AS name, labels(f) AS type LIMIT 1;",
+        "response_time_ms": 5003,
+        "cypher_generated": "MATCH (p:Project)-[:CONTAINS_PACKAGE*]->(m:Module {name: 'benchmark_models'})-[:DEFINES]->(f:Function) \nWHERE f.name = 'main' \nRETURN f.qualified_name AS qualified_name, f.name AS name, labels(f) AS type;",
         "result_quality": "partial",
         "notes": "Successfully retrieved 0 item(s) from the graph."
       },
       "N2": {
         "status": "partial",
-        "response_time_ms": 4607,
-        "cypher_generated": "MATCH (m:Module)-[:DEFINES]->(f:Function {name: 'main'})\nWHERE m.qualified_name STARTS WITH 'com.example.mcp'\nRETURN f.qualified_name AS qualified_name, f.name AS name, labels(f) AS type;",
+        "response_time_ms": 4468,
+        "cypher_generated": "MATCH (c:Class) WHERE c.qualified_name STARTS WITH 'APIError' OR ANY(decorator IN c.decorators WHERE decorator CONTAINS 'api_error') RETURN c.qualified_name AS qualified_name, c.name AS name, labels(c) AS type;",
         "result_quality": "partial",
         "notes": "Successfully retrieved 0 item(s) from the graph."
       },
       "N3": {
-        "status": "pass",
-        "response_time_ms": 3499,
-        "cypher_generated": "MATCH (c:Class)-[:INHERITS]->(parent:Class)\nRETURN c.qualified_name AS child_class_qualified_name, parent.qualified_name AS parent_class_qualified_name;",
-        "result_quality": "accurate",
-        "notes": "Successfully retrieved 14 item(s) from the graph."
+        "status": "partial",
+        "response_time_ms": 7524,
+        "cypher_generated": "N/A",
+        "result_quality": "partial",
+        "notes": "Error executing query: \"<EOF>, ';'\""
       },
       "N4": {
         "status": "pass",
-        "response_time_ms": 4478,
-        "cypher_generated": "MATCH (f1:Function)-[:CALLS]->(f2:Function)\nRETURN f2.qualified_name AS qualified_name, f2.name AS name, count(f1) AS call_count\nORDER BY call_count DESC\nLIMIT 10;",
+        "response_time_ms": 4255,
+        "cypher_generated": "MATCH (caller:Function)-[:CALLS]->(callee:Function)\nRETURN callee.qualified_name AS qualified_name, callee.name AS name, count(DISTINCT caller) AS call_count\nORDER BY call_count DESC\nLIMIT 10;",
         "result_quality": "accurate",
         "notes": "Successfully retrieved 10 item(s) from the graph."
       },
       "N5": {
-        "status": "pass",
-        "response_time_ms": 6448,
-        "cypher_generated": "MATCH (n:Class|Function|Method)\nWHERE toLower(n.qualified_name) CONTAINS 'error'\n   OR toLower(n.name) CONTAINS 'error'\n   OR ANY(decorator IN n.decorators WHERE toLower(decorator) CONTAINS 'error')\nRETURN n.qualified_name AS qualified_name, n.name AS name, labels(n) AS type\nLIMIT 10;",
-        "result_quality": "accurate",
-        "notes": "Successfully retrieved 10 item(s) from the graph."
+        "status": "partial",
+        "response_time_ms": 3607,
+        "cypher_generated": "MATCH (c:Class)\nWHERE toLower(c.qualified_name) ENDS WITH 'exception'\nRETURN c.qualified_name AS qualified_name, c.name AS name, labels(c) AS type;",
+        "result_quality": "partial",
+        "notes": "Successfully retrieved 0 item(s) from the graph."
       }
     },
     "structural_queries": {
       "S1": {
-        "status": "pass",
-        "response_time_ms": 2,
-        "result_count": 2,
-        "performance_target_met": true,
-        "notes": "Found 2 callers in 2ms"
-      },
-      "S2": {
         "status": "partial",
         "response_time_ms": 8,
-        "result_count": 7,
+        "result_count": 0,
         "performance_target_met": true,
-        "notes": "Found 7 descendants in 8ms"
+        "notes": "Found 0 callers in 8ms"
+      },
+      "S2": {
+        "status": "pass",
+        "response_time_ms": 8,
+        "result_count": 3,
+        "performance_target_met": true,
+        "notes": "Found 3 descendants in 8ms"
       },
       "S3": {
-        "status": "partial",
-        "response_time_ms": 2,
-        "result_count": 11,
-        "performance_target_met": true,
-        "notes": "Found 11 dependencies in 2ms"
-      },
-      "S4": {
-        "status": "partial",
-        "response_time_ms": 2,
-        "result_count": 7,
-        "performance_target_met": true,
-        "notes": "Found 7 implementations in 2ms"
-      },
-      "S5": {
         "status": "partial",
         "response_time_ms": 6,
         "result_count": 0,
         "performance_target_met": true,
-        "notes": "Found 0 exports in 6ms"
+        "notes": "Found 0 dependencies in 6ms"
+      },
+      "S4": {
+        "status": "pass",
+        "response_time_ms": 4,
+        "result_count": 3,
+        "performance_target_met": true,
+        "notes": "Found 3 implementations in 4ms"
+      },
+      "S5": {
+        "status": "partial",
+        "response_time_ms": 4,
+        "result_count": 0,
+        "performance_target_met": true,
+        "notes": "Found 0 exports in 4ms"
       },
       "S6": {
         "status": "pass",
         "response_time_ms": 2,
-        "result_count": 1,
+        "result_count": 15,
         "performance_target_met": true,
-        "notes": "Generated call graph with 1 nodes in 2ms"
+        "notes": "Generated call graph with 15 nodes in 2ms"
       },
       "S7": {
-        "status": "partial",
+        "status": "pass",
         "response_time_ms": 0,
         "result_count": 10,
         "performance_target_met": true,
@@ -217,22 +205,22 @@
       "E6": {
         "status": "pass",
         "handled_gracefully": true,
-        "error_message": "Function 'nonexistent.module.fake_function' not found in code graph.",
+        "error_message": "Function 'ai-gateway-mcp.nonexistent.module.fake_function' not found in code graph.",
         "has_suggestion": true,
         "notes": "Non-existent function query"
       },
       "E7": {
         "status": "pass",
         "handled_gracefully": true,
-        "error_message": "Class 'nonexistent.FakeClass' not found in code graph.",
+        "error_message": "Class 'ai-gateway-mcp.nonexistent.FakeClass' not found in code graph.",
         "notes": "Non-existent class query"
       },
       "E8": {
         "status": "pass",
         "handled_gracefully": true,
         "truncated": false,
-        "row_count": 5,
-        "total_count": 5,
+        "row_count": 0,
+        "total_count": 0,
         "notes": "Truncation test - truncated: False"
       },
       "E9": {
@@ -264,7 +252,7 @@
         "status": "pass",
         "handled_gracefully": true,
         "has_results": true,
-        "result_count": 1,
+        "result_count": 3,
         "notes": "Empty result with valid node"
       },
       "E14": {
@@ -281,27 +269,27 @@
     },
     "performance": {
       "P1": {
-        "avg_ms": 2504,
-        "max_ms": 2629,
-        "min_ms": 2439,
+        "avg_ms": 2417,
+        "max_ms": 2562,
+        "min_ms": 2339,
         "target_met": true
       },
       "P2": {
-        "avg_ms": 4871,
-        "max_ms": 5356,
-        "min_ms": 4386,
+        "avg_ms": 4974,
+        "max_ms": 5285,
+        "min_ms": 4663,
         "target_met": true
       },
       "P3": {
-        "avg_ms": 3,
-        "max_ms": 4,
+        "avg_ms": 6,
+        "max_ms": 11,
         "min_ms": 2,
         "target_met": true
       },
       "P4": {
-        "avg_ms": 3486,
-        "max_ms": 10458,
-        "min_ms": 3486,
+        "avg_ms": 3461,
+        "max_ms": 10383,
+        "min_ms": 3461,
         "target_met": true
       }
     },
@@ -354,18 +342,19 @@
       },
       "ISO2": {
         "status": "pass",
-        "response_time_ms": 2,
+        "response_time_ms": 3,
         "performance_acceptable": true,
-        "notes": "Project filter query completed in 2ms"
+        "notes": "Project filter query completed in 3ms"
       },
       "ISO3": {
         "status": "pass",
-        "project_count": 1,
+        "project_count": 2,
         "projects": [
-          "code-graph-rag"
+          "code-graph-rag",
+          "ai-gateway-mcp"
         ],
-        "isolation_maintained": true,
-        "notes": "Found 1 project(s) in graph"
+        "has_current_project": true,
+        "notes": "Found 2 project(s) in graph, current project present: True"
       }
     },
     "error_handling": {
@@ -400,42 +389,42 @@
         "status": "pass",
         "successful_queries": 3,
         "total_queries": 3,
-        "response_time_ms": 9,
+        "response_time_ms": 17,
         "notes": "3/3 concurrent queries succeeded"
       },
       "CONC2": {
         "status": "pass",
         "successful_queries": 3,
         "total_queries": 3,
-        "response_time_ms": 7,
+        "response_time_ms": 14,
         "notes": "Mixed tool concurrent execution: 3/3"
       },
       "CONC3": {
         "status": "pass",
         "successful_queries": 10,
         "total_queries": 10,
-        "response_time_ms": 10,
-        "avg_time_per_query": 1,
-        "notes": "High load test: 10/10 succeeded in 10ms"
+        "response_time_ms": 21,
+        "avg_time_per_query": 2,
+        "notes": "High load test: 10/10 succeeded in 21ms"
       },
       "CONC4": {
         "status": "pass",
         "successful_queries": 5,
         "total_queries": 5,
-        "response_time_ms": 16,
+        "response_time_ms": 28,
         "notes": "Variable depth concurrent queries: 5/5"
       }
     }
   },
   "summary": {
-    "total_tests": 61,
-    "passed": 40,
-    "partial": 20,
+    "total_tests": 59,
+    "passed": 44,
+    "partial": 14,
     "failed": 0,
     "skipped": 1,
-    "pass_rate": "65.6%",
+    "pass_rate": "74.6%",
     "test_categories": {
-      "basic_queries": 8,
+      "basic_queries": 6,
       "code_retrieval": 5,
       "natural_language": 5,
       "structural_queries": 7,
@@ -467,7 +456,7 @@
       "MCP integration: 5 tests verify tool registration and schemas",
       "Edge cases: 15 scenarios tested for robustness",
       "Concurrent operations: 4 tests verify thread safety",
-      "Investigate 20 partial results for potential issues",
+      "Investigate 14 partial results for potential issues",
       "Continue monitoring performance on larger codebases"
     ]
   }

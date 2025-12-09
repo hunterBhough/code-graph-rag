@@ -14,8 +14,8 @@ wheels/
 .mypy_cache/
 .pytest_cache/
 .claude/
-# MCP codebase intelligence - all auto-generated/derived data
-.mcp/codebase-intelligence/
+# MCP - all auto-generated/derived data
+.mcp/
 
 # Infrastructure logs (can be large)
 infrastructure/logs/*.log

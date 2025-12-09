@@ -23,7 +23,7 @@ log_header() { echo -e "${CYAN}════════════════�
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CODE_GRAPH_INIT="$REPO_ROOT/init-project-graph.sh"
-VECTOR_SEARCH_INIT="/Users/hunter/code/ai_agency/shared/mcp-servers/vector-search-mcp/init-project-search.sh"
+VECTOR_SEARCH_INIT="/Users/hunter/code/ai_agency/shared/mcp-servers/seekr/init-project-search.sh"
 
 # Define all projects with their paths and groups
 declare -A PROJECTS=(
@@ -32,7 +32,7 @@ declare -A PROJECTS=(
     ["ai-gateway-mcp"]="/Users/hunter/code/ai_agency/shared/mcp-servers/ai-gateway-mcp:mcp-servers"
     ["conversational-memory-mcp"]="/Users/hunter/code/ai_agency/shared/mcp-servers/conversational-memory-mcp:mcp-servers"
     ["mcp-service-wrappers"]="/Users/hunter/code/ai_agency/shared/mcp-servers/mcp-service-wrappers:mcp-servers"
-    ["vector-search-mcp"]="/Users/hunter/code/ai_agency/shared/mcp-servers/vector-search-mcp:mcp-servers"
+    ["seekr"]="/Users/hunter/code/ai_agency/shared/mcp-servers/seekr:mcp-servers"
 
     # Dashboard group
     ["claude-topology-designer"]="/Users/hunter/code/ai_agency/shared/dashboard/claude-topology-designer:dashboard"

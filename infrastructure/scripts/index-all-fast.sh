@@ -23,7 +23,7 @@ log_header() { echo -e "${CYAN}$1${NC}"; }
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CODE_GRAPH_INIT="$REPO_ROOT/init-project-graph.sh"
-VECTOR_SEARCH_INIT="/Users/hunter/code/ai_agency/shared/mcp-servers/vector-search-mcp/init-project-search.sh"
+VECTOR_SEARCH_INIT="/Users/hunter/code/ai_agency/shared/mcp-servers/seekr/init-project-search.sh"
 
 # All project paths
 PROJECTS=(
@@ -31,7 +31,7 @@ PROJECTS=(
     "/Users/hunter/code/ai_agency/shared/mcp-servers/ai-gateway-mcp:mcp-servers"
     "/Users/hunter/code/ai_agency/shared/mcp-servers/conversational-memory-mcp:mcp-servers"
     "/Users/hunter/code/ai_agency/shared/mcp-servers/mcp-service-wrappers:mcp-servers"
-    "/Users/hunter/code/ai_agency/shared/mcp-servers/vector-search-mcp:mcp-servers"
+    "/Users/hunter/code/ai_agency/shared/mcp-servers/seekr:mcp-servers"
     "/Users/hunter/code/ai_agency/shared/dashboard/claude-topology-designer:dashboard"
     "/Users/hunter/code/ai_agency/shared/dashboard/remote-ai-control:dashboard"
     "/Users/hunter/code/ai_agency/brain/mastermind:brain"

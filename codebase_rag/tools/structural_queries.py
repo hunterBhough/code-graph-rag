@@ -551,7 +551,7 @@ def create_find_callers_tool(ingestor: Any) -> dict[str, Any]:
     """
     query_tool = FindCallersQuery()
 
-    def find_callers(
+    async def find_callers(
         function_name: str, max_depth: int = 1, include_paths: bool = True
     ) -> dict[str, Any]:
         """Find all functions that call a specified target function.
@@ -923,7 +923,7 @@ def create_dependency_analysis_tool(ingestor: Any) -> dict[str, Any]:
     """
     query_tool = DependencyAnalysisQuery()
 
-    def dependency_analysis(
+    async def dependency_analysis(
         target: str,
         dependency_type: Literal["imports", "calls", "all"] = "all",
         include_transitive: bool = False,
@@ -1226,7 +1226,7 @@ def create_interface_implementations_tool(ingestor: Any) -> dict[str, Any]:
     """
     query_tool = InterfaceImplementationsQuery()
 
-    def interface_implementations(
+    async def interface_implementations(
         interface_name: str,
         include_indirect: bool = False,
     ) -> dict[str, Any]:
@@ -1498,7 +1498,7 @@ def create_expert_mode_tool(ingestor: Any) -> dict[str, Any]:
     """
     query_tool = ExpertModeQuery()
 
-    def expert_mode_cypher(
+    async def expert_mode_cypher(
         query: str,
         parameters: dict[str, Any] | None = None,
         limit: int = 50,
@@ -1832,7 +1832,7 @@ def create_call_graph_tool(ingestor: Any) -> dict[str, Any]:
     """
     query_tool = CallGraphGeneratorQuery()
 
-    def call_graph_generator(
+    async def call_graph_generator(
         entry_point: str,
         max_depth: int = 3,
         max_nodes: int = 50,
@@ -2104,7 +2104,7 @@ def create_class_hierarchy_tool(ingestor: Any) -> dict[str, Any]:
     """
     query_tool = ClassHierarchyQuery()
 
-    def class_hierarchy(
+    async def class_hierarchy(
         class_name: str,
         direction: Literal["up", "down", "both"] = "both",
         max_depth: int = 10,
@@ -2266,7 +2266,7 @@ def create_module_exports_tool(ingestor: Any) -> dict[str, Any]:
     """
     query_tool = ModuleExportsQuery()
 
-    def module_exports(
+    async def module_exports(
         module_name: str, include_private: bool = False
     ) -> dict[str, Any]:
         """Retrieve all public exports from a module.

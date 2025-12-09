@@ -331,6 +331,8 @@ This infrastructure was recently migrated from a centralized `codebase-intellige
 - Memgraph graph database (via mgclient connection, host:port 7687) (001-fix-db-connection)
 - Python 3.12+ (requires-python >= 3.12) + pymgclient 1.4.0 (Memgraph client), tree-sitter 0.25.0 (AST parsing), mcp 1.21.1+ (MCP protocol), pydantic-ai-slim 0.2.18+ (LLM integration for NL→Cypher), loguru 0.7.3 (logging) (002-graph-query-engine)
 - Memgraph Community Edition (graph database at localhost:7687), project-based isolation via CONTAINS relationships (002-graph-query-engine)
+- Python 3.12+ (requires-python >= 3.12) + mcp>=1.21.1, pymgclient>=1.4.0, loguru>=0.7.3, pydantic-ai-slim>=0.2.18 (001-fix-async-handlers)
+- Memgraph (graph database at localhost:7687) (001-fix-async-handlers)
 
 ## Recent Changes
 - 001-fix-db-connection: Added Python 3.14.2 (requires-python >= 3.12) + pymgclient 1.4.0, loguru 0.7.3, pydantic-settings 2.0.0

@@ -5,7 +5,7 @@
 set -e
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../.. && pwd)"
-VECTOR_SEARCH_ROOT="/Users/hunter/code/ai_agency/shared/mcp-servers/vector-search-mcp"
+VECTOR_SEARCH_ROOT="/Users/hunter/code/ai_agency/shared/mcp-servers/seekr"
 VECTOR_SEARCH_PORT="${VECTOR_SEARCH_HTTP_PORT:-3456}"
 VECTOR_SEARCH_URL="http://localhost:$VECTOR_SEARCH_PORT"
 LOG_FILE="$REPO_ROOT/.mcp/vector-search/update.log"

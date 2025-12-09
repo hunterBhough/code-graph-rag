@@ -1,0 +1,78 @@
+{
+  "name": "query_hierarchy",
+  "description": "Retrieve class inheritance hierarchies showing ancestors (parent classes), descendants (child classes), or both directions. Use this to understand class relationships before refactoring base classes.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "class_name": {
+        "type": "string",
+        "description": "Fully qualified name of the class to analyze (e.g., 'auth.models.BaseAuth' or 'services.UserService')"
+      },
+      "direction": {
+        "type": "string",
+        "enum": ["up", "down", "both"],
+        "description": "Direction to traverse: 'up' for ancestors (parents), 'down' for descendants (children), 'both' for complete hierarchy (default: 'both')",
+        "default": "both"
+      },
+      "max_depth": {
+        "type": "integer",
+        "description": "Maximum depth to traverse hierarchy (default: 10)",
+        "default": 10,
+        "minimum": 1,
+        "maximum": 10
+      }
+    },
+    "required": ["class_name"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {"type": "string"},
+      "hierarchy_tree": {
+        "type": "object",
+        "description": "Nested tree structure showing class hierarchy"
+      },
+      "ancestors": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "class_name": {"type": "string"},
+            "depth": {"type": "integer", "description": "Distance from target class"}
+          }
+        }
+      },
+      "descendants": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "class_name": {"type": "string"},
+            "depth": {"type": "integer", "description": "Distance from target class"}
+          }
+        }
+      },
+      "circular_dependencies": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "cycle_type": {"type": "string"},
+            "cycle_path": {"type": "array", "items": {"type": "string"}},
+            "cycle_length": {"type": "integer"}
+          }
+        },
+        "description": "Circular inheritance chains (informational warning)"
+      },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "row_count": {"type": "integer"},
+          "total_count": {"type": "integer"},
+          "truncated": {"type": "boolean"},
+          "execution_time_ms": {"type": "number"}
+        }
+      }
+    }
+  }
+}

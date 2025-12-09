@@ -32,16 +32,30 @@ def create_query_tool(
         """
         Queries the codebase knowledge graph using natural language.
 
+        **IMPORTANT**: For common structural queries, prefer using the pre-built
+        specialized tools instead:
+        - query_callers: Find functions that call a target function
+        - query_hierarchy: Explore class inheritance hierarchies
+        - query_dependencies: Analyze module/function dependencies
+        - query_implementations: Find interface/base class implementations
+        - query_module_exports: List public exports from a module
+        - query_call_graph: Generate call graphs from entry points
+        - query_cypher: Execute custom Cypher queries (expert mode)
+
+        Use this natural language tool only for complex or uncommon queries that
+        don't fit the pre-built patterns. The specialized tools are faster, more
+        reliable, and provide better error messages.
+
         Provide your question in plain English about the codebase structure,
         functions, classes, dependencies, or relationships. The tool will
         automatically translate your natural language question into the
         appropriate database query and return the results.
 
-        Examples:
-        - "Find all functions that call each other"
-        - "What classes are in the user authentication module"
-        - "Show me functions with the longest call chains"
-        - "Which files contain functions related to database operations"
+        Examples of queries suitable for this tool:
+        - "Find all functions with more than 5 callers sorted by complexity"
+        - "Show me circular dependencies in the authentication module"
+        - "Which classes have methods that are never called"
+        - "Find functions that call multiple database-related functions"
         """
         logger.info(f"[Tool:QueryGraph] Received NL query: '{natural_language_query}'")
         cypher_query = "N/A"

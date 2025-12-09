@@ -1,0 +1,56 @@
+{
+  "name": "query_exports",
+  "description": "Retrieve all public exports (functions, classes) from a specified module. Use this to understand a module's public API surface.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "module_name": {
+        "type": "string",
+        "description": "Fully qualified name of the module (e.g., 'auth.services' or 'utils.validators')"
+      },
+      "include_private": {
+        "type": "boolean",
+        "description": "Include private members (names starting with underscore). (default: false)",
+        "default": false
+      }
+    },
+    "required": ["module_name"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {"type": "string"},
+      "exports": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {"type": "string"},
+            "qualified_name": {"type": "string"},
+            "type": {"type": "string", "enum": ["Function", "Class", "Method"], "description": "Type of exported entity"},
+            "file_path": {"type": "string"},
+            "line_number": {"type": "integer"}
+          }
+        },
+        "description": "List of exported functions and classes"
+      },
+      "module_info": {
+        "type": "object",
+        "properties": {
+          "module_name": {"type": "string"},
+          "file_path": {"type": "string"}
+        },
+        "description": "Module metadata"
+      },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "row_count": {"type": "integer"},
+          "total_count": {"type": "integer"},
+          "truncated": {"type": "boolean"},
+          "execution_time_ms": {"type": "number"}
+        }
+      }
+    }
+  }
+}

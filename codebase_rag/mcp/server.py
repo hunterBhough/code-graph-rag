@@ -103,6 +103,7 @@ def create_server() -> tuple[Server, MemgraphIngestor]:
         host=settings.MEMGRAPH_HOST,
         port=settings.MEMGRAPH_PORT,
         batch_size=settings.MEMGRAPH_BATCH_SIZE,
+        project_name=project_root.name,
     )
 
     # CypherGenerator gets config from settings automatically

@@ -1,0 +1,68 @@
+{
+  "name": "query_dependencies",
+  "description": "Analyze module or function dependencies including imports and function calls. Use this to understand coupling and plan module extraction or refactoring.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "target": {
+        "type": "string",
+        "description": "Fully qualified name of module or function to analyze (e.g., 'auth.services' or 'auth.services.login')"
+      },
+      "dependency_type": {
+        "type": "string",
+        "enum": ["imports", "calls", "all"],
+        "description": "Type of dependencies to retrieve: 'imports' for module imports, 'calls' for function calls, 'all' for both (default: 'all')",
+        "default": "all"
+      },
+      "include_transitive": {
+        "type": "boolean",
+        "description": "Include transitive dependencies (dependencies of dependencies). Use cautiously as this can generate large result sets. (default: false)",
+        "default": false
+      }
+    },
+    "required": ["target"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {"type": "string"},
+      "imports": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "module_name": {"type": "string"},
+            "is_external": {"type": "boolean", "description": "True if third-party package"},
+            "depth": {"type": "integer", "description": "Depth for transitive dependencies"}
+          }
+        },
+        "description": "Imported modules (if dependency_type='imports' or 'all')"
+      },
+      "calls": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "function_name": {"type": "string"},
+            "file_path": {"type": "string"},
+            "depth": {"type": "integer", "description": "Depth for transitive calls"}
+          }
+        },
+        "description": "Called functions (if dependency_type='calls' or 'all')"
+      },
+      "dependency_graph": {
+        "type": "object",
+        "description": "Adjacency list representation of dependencies"
+      },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "row_count": {"type": "integer"},
+          "total_count": {"type": "integer"},
+          "truncated": {"type": "boolean"},
+          "execution_time_ms": {"type": "number"}
+        }
+      }
+    }
+  }
+}

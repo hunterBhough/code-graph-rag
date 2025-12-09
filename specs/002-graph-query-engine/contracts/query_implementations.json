@@ -1,0 +1,50 @@
+{
+  "name": "query_implementations",
+  "description": "Find all classes that implement a specified interface or extend a base class. Use this to find all implementations of an interface or all subclasses of a base class.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "interface_name": {
+        "type": "string",
+        "description": "Fully qualified name of interface or base class (e.g., 'auth.interfaces.PaymentProvider' or 'models.BaseModel')"
+      },
+      "include_indirect": {
+        "type": "boolean",
+        "description": "Include indirect implementations (child classes of implementers). Use cautiously with deep inheritance trees. (default: false)",
+        "default": false
+      }
+    },
+    "required": ["interface_name"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {"type": "string"},
+      "implementations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "class_name": {"type": "string"},
+            "file_path": {"type": "string"},
+            "depth": {"type": "integer", "description": "Inheritance depth from interface (1=direct implementation)"}
+          }
+        },
+        "description": "Classes implementing the interface or extending the base class"
+      },
+      "inheritance_depth": {
+        "type": "object",
+        "description": "Map of class qualified names to their inheritance depth from the interface"
+      },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "row_count": {"type": "integer"},
+          "total_count": {"type": "integer"},
+          "truncated": {"type": "boolean"},
+          "execution_time_ms": {"type": "number"}
+        }
+      }
+    }
+  }
+}

@@ -20,3 +20,12 @@ projects:
 	  group: ""
 	  databases: [codegraph_claude-conductor]
 	  initialized_at: 2025-12-05T06:42:36
+	- name: code-graph-rag
+	  group: ""
+	  databases: [codegraph_code-graph-rag]
+	  initialized_at: 2025-12-08T17:10:06
+	- name: code-graph-rag
+	  path: /Users/hunter/code/ai_agency/shared/mcp-servers/code-graph-rag
+	  group: ""
+	  databases: [codegraph_code-graph-rag]
+	  initialized_at: 2025-12-09T04:36:02

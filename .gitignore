@@ -14,13 +14,8 @@ wheels/
 .mypy_cache/
 .pytest_cache/
 .claude/
-.qdrant_code_embeddings/
-
-# Codebase intelligence - all auto-generated/derived data
-.codebase-intelligence/
-
-# Vector search data
-.vector-search/
+# MCP codebase intelligence - all auto-generated/derived data
+.mcp/codebase-intelligence/
 
 # Infrastructure logs (can be large)
 infrastructure/logs/*.log
@@ -29,3 +24,6 @@ infrastructure/logs/*.log
 .specify/
 !.specify/memory/
 !.specify/memory/constitution.md
+
+# Codebase intelligence - all auto-generated/derived data
+.codebase-intelligence/

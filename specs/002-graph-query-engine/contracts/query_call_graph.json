@@ -1,0 +1,78 @@
+{
+  "name": "query_call_graph",
+  "description": "Generate a call graph starting from an entry point function, showing all called functions up to max_depth. Use this to visualize execution flow and understand program structure.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "entry_point": {
+        "type": "string",
+        "description": "Fully qualified name of the entry point function (e.g., 'app.main' or 'services.UserService.process_request')"
+      },
+      "max_depth": {
+        "type": "integer",
+        "description": "Maximum depth to traverse call graph. Higher values exponentially increase result size. (default: 3)",
+        "default": 3,
+        "minimum": 1,
+        "maximum": 5
+      },
+      "max_nodes": {
+        "type": "integer",
+        "description": "Maximum number of nodes to return. Graph will be truncated if exceeded. (default: 50)",
+        "default": 50,
+        "minimum": 1,
+        "maximum": 100
+      }
+    },
+    "required": ["entry_point"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {"type": "string"},
+      "nodes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "string", "description": "Qualified function name"},
+            "name": {"type": "string", "description": "Short function name"},
+            "type": {"type": "string", "enum": ["Function", "Method"]},
+            "file_path": {"type": "string"},
+            "line_number": {"type": "integer"}
+          }
+        },
+        "description": "Functions in the call graph"
+      },
+      "edges": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "from": {"type": "string", "description": "Caller qualified name"},
+            "to": {"type": "string", "description": "Callee qualified name"},
+            "call_type": {"type": "string", "enum": ["direct", "method", "constructor"]}
+          }
+        },
+        "description": "Call relationships between functions"
+      },
+      "truncated": {
+        "type": "boolean",
+        "description": "Whether graph was truncated at max_nodes limit"
+      },
+      "total_nodes": {
+        "type": "integer",
+        "description": "Total nodes in complete graph (before truncation)"
+      },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "row_count": {"type": "integer"},
+          "total_count": {"type": "integer"},
+          "truncated": {"type": "boolean"},
+          "execution_time_ms": {"type": "number"},
+          "max_depth": {"type": "integer"}
+        }
+      }
+    }
+  }
+}

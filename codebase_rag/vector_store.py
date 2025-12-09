@@ -16,8 +16,8 @@ if has_qdrant_client():
         global _CLIENT
         if _CLIENT is None:
             _CLIENT = QdrantClient(
-                path="./.qdrant_code_embeddings"
-            )  # disk storage path="./.qdrant_code_embeddings"
+                path="./.mcp/codebase-intelligence/code-graph-rag/.qdrant"
+            )
             if not _CLIENT.collection_exists(_COLLECTION):
                 _CLIENT.create_collection(
                     collection_name=_COLLECTION,

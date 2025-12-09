@@ -24,6 +24,15 @@ from codebase_rag.tools.directory_lister import (
 from codebase_rag.tools.file_editor import FileEditor, create_file_editor_tool
 from codebase_rag.tools.file_reader import FileReader, create_file_reader_tool
 from codebase_rag.tools.file_writer import FileWriter, create_file_writer_tool
+from codebase_rag.tools.structural_queries import (
+    create_find_callers_tool,
+    create_class_hierarchy_tool,
+    create_dependency_analysis_tool,
+    create_interface_implementations_tool,
+    create_expert_mode_tool,
+    create_call_graph_tool,
+    create_module_exports_tool,
+)
 
 
 @dataclass
@@ -79,6 +88,15 @@ class MCPToolsRegistry:
             directory_lister=self.directory_lister
         )
 
+        # Create structural query tools
+        self._find_callers_tool = create_find_callers_tool(ingestor=ingestor)
+        self._class_hierarchy_tool = create_class_hierarchy_tool(ingestor=ingestor)
+        self._dependency_analysis_tool = create_dependency_analysis_tool(ingestor=ingestor)
+        self._interface_implementations_tool = create_interface_implementations_tool(ingestor=ingestor)
+        self._expert_mode_tool = create_expert_mode_tool(ingestor=ingestor)
+        self._call_graph_tool = create_call_graph_tool(ingestor=ingestor)
+        self._module_exports_tool = create_module_exports_tool(ingestor=ingestor)
+
         # Build tool registry - single source of truth for all tool metadata
         self._tools: dict[str, ToolMetadata] = {
             "index_repository": ToolMetadata(
@@ -95,9 +113,10 @@ class MCPToolsRegistry:
             ),
             "query_code_graph": ToolMetadata(
                 name="query_code_graph",
-                description="Query the codebase knowledge graph using natural language. "
-                "Ask questions like 'What functions call UserService.create_user?' or "
-                "'Show me all classes that implement the Repository interface'.",
+                description="Query the codebase knowledge graph for complex structural patterns using natural language. "
+                "PREFER pre-built tools (query_callers, query_hierarchy, query_dependencies, etc.) for common queries. "
+                "Use this for custom structural relationship queries like 'Find functions with >5 callers' or "
+                "'Show circular dependencies in authentication module'.",
                 input_schema={
                     "type": "object",
                     "properties": {
@@ -213,6 +232,55 @@ class MCPToolsRegistry:
                 },
                 handler=self.list_directory,
                 returns_json=False,
+            ),
+            "query_callers": ToolMetadata(
+                name=self._find_callers_tool["name"],
+                description=self._find_callers_tool["description"],
+                input_schema=self._find_callers_tool["input_schema"],
+                handler=self._find_callers_tool["handler"],
+                returns_json=True,
+            ),
+            "query_hierarchy": ToolMetadata(
+                name=self._class_hierarchy_tool["name"],
+                description=self._class_hierarchy_tool["description"],
+                input_schema=self._class_hierarchy_tool["input_schema"],
+                handler=self._class_hierarchy_tool["handler"],
+                returns_json=True,
+            ),
+            "query_dependencies": ToolMetadata(
+                name=self._dependency_analysis_tool["name"],
+                description=self._dependency_analysis_tool["description"],
+                input_schema=self._dependency_analysis_tool["input_schema"],
+                handler=self._dependency_analysis_tool["handler"],
+                returns_json=True,
+            ),
+            "query_implementations": ToolMetadata(
+                name=self._interface_implementations_tool["name"],
+                description=self._interface_implementations_tool["description"],
+                input_schema=self._interface_implementations_tool["input_schema"],
+                handler=self._interface_implementations_tool["handler"],
+                returns_json=True,
+            ),
+            "query_cypher": ToolMetadata(
+                name=self._expert_mode_tool["name"],
+                description=self._expert_mode_tool["description"],
+                input_schema=self._expert_mode_tool["input_schema"],
+                handler=self._expert_mode_tool["handler"],
+                returns_json=True,
+            ),
+            "query_call_graph": ToolMetadata(
+                name=self._call_graph_tool["name"],
+                description=self._call_graph_tool["description"],
+                input_schema=self._call_graph_tool["input_schema"],
+                handler=self._call_graph_tool["handler"],
+                returns_json=True,
+            ),
+            "query_module_exports": ToolMetadata(
+                name=self._module_exports_tool["name"],
+                description=self._module_exports_tool["description"],
+                input_schema=self._module_exports_tool["input_schema"],
+                handler=self._module_exports_tool["handler"],
+                returns_json=True,
             ),
         }
 

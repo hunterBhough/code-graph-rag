@@ -38,10 +38,6 @@ from .tools.document_analyzer import DocumentAnalyzer, create_document_analyzer_
 from .tools.file_editor import FileEditor, create_file_editor_tool
 from .tools.file_reader import FileReader, create_file_reader_tool
 from .tools.file_writer import FileWriter, create_file_writer_tool
-from .tools.semantic_search import (
-    create_get_function_source_tool,
-    create_semantic_search_tool,
-)
 from .tools.shell_command import ShellCommander, create_shell_command_tool
 
 # Style constants
@@ -754,8 +750,6 @@ def _initialize_services_and_agent(repo_path: str, ingestor: MemgraphIngestor) -
     shell_command_tool = create_shell_command_tool(shell_commander)
     directory_lister_tool = create_directory_lister_tool(directory_lister)
     document_analyzer_tool = create_document_analyzer_tool(document_analyzer)
-    semantic_search_tool = create_semantic_search_tool()
-    function_source_tool = create_get_function_source_tool()
 
     rag_agent = create_rag_orchestrator(
         tools=[
@@ -767,8 +761,6 @@ def _initialize_services_and_agent(repo_path: str, ingestor: MemgraphIngestor) -
             shell_command_tool,
             directory_lister_tool,
             document_analyzer_tool,
-            semantic_search_tool,
-            function_source_tool,
         ]
     )
     return rag_agent
@@ -785,6 +777,7 @@ async def main_async(repo_path: str, batch_size: int) -> None:
         host=settings.MEMGRAPH_HOST,
         port=settings.MEMGRAPH_PORT,
         batch_size=batch_size,
+        project_name=project_root.name,
     ) as ingestor:
         console.print("[bold green]Successfully connected to Memgraph.[/bold green]")
         console.print(
@@ -861,7 +854,7 @@ def start(
     effective_batch_size = settings.resolve_batch_size(batch_size)
 
     if update_graph:
-        repo_to_update = Path(target_repo_path)
+        repo_to_update = Path(target_repo_path).resolve()
         console.print(
             f"[bold green]Updating knowledge graph for: {repo_to_update}[/bold green]"
         )
@@ -870,6 +863,7 @@ def start(
             host=settings.MEMGRAPH_HOST,
             port=settings.MEMGRAPH_PORT,
             batch_size=effective_batch_size,
+            project_name=repo_to_update.name,
         ) as ingestor:
             if clean:
                 console.print("[bold yellow]Cleaning database...[/bold yellow]")
@@ -930,6 +924,7 @@ def export(
             host=settings.MEMGRAPH_HOST,
             port=settings.MEMGRAPH_PORT,
             batch_size=effective_batch_size,
+            project_name="__all__",  # Export all projects
         ) as ingestor:
             console.print("[bold cyan]Exporting graph data...[/bold cyan]")
             if not _export_graph_to_file(ingestor, output):
@@ -970,6 +965,7 @@ async def main_optimize_async(
         host=settings.MEMGRAPH_HOST,
         port=settings.MEMGRAPH_PORT,
         batch_size=effective_batch_size,
+        project_name=project_root.name,
     ) as ingestor:
         console.print("[bold green]Successfully connected to Memgraph.[/bold green]")
 

@@ -18,17 +18,17 @@
 </p>
 </div>
 
-# Graph-Code: A Graph-Based RAG System for Any Codebases
+# Graph-Code: A Specialized Graph Query Engine for Any Codebases
 
-An accurate Retrieval-Augmented Generation (RAG) system that analyzes multi-language codebases using Tree-sitter, builds comprehensive knowledge graphs, and enables natural language querying of codebase structure and relationships as well as editing capabilities.
+A specialized graph query engine that analyzes multi-language codebases using Tree-sitter, builds comprehensive knowledge graphs in Memgraph, and enables structural relationship queries (function calls, class hierarchies, dependencies, call graphs) for precise codebase understanding and safe refactoring. Part of a three-tool architecture alongside vector-search-mcp (semantic search) and mcp-ragdocs (documentation search).
 
 
 https://github.com/user-attachments/assets/2fec9ef5-7121-4e6c-9b68-dc8d8a835115
 
 ## Latest News 🔥
 
-- **[NEW]** **MCP Server Integration**: Graph-Code now works as an MCP server with Claude Code! Query and edit your codebase using natural language directly from Claude Code. [Setup Guide](docs/claude-code-setup.md)
-- [2025/10/21] **Semantic Code Search**: Added intent-based code search using UniXcoder embeddings. Find functions by describing what they do (e.g., "error handling functions", "authentication code") rather than by exact names.
+- **[NEW]** **Specialized Graph Query Engine**: Refactored to focus exclusively on structural code relationships (function calls, class hierarchies, dependencies). Semantic search delegated to vector-search-mcp for clearer tool separation.
+- **[NEW]** **MCP Server Integration**: Graph-Code now works as an MCP server with Claude Code! Query and edit your codebase using structural relationship queries directly from Claude Code. [Setup Guide](docs/claude-code-setup.md)
 
 ## 🛠️ Makefile Updates
 
@@ -70,6 +70,63 @@ Use the Makefile for:
 - **🔗 Dependency Analysis**: Parses `pyproject.toml` to understand external dependencies
 - **🎯 Nested Function Support**: Handles complex nested functions and class hierarchies
 - **🔄 Language-Agnostic Design**: Unified graph schema across all supported languages
+
+## 🔍 Structural Query Tools
+
+Graph-Code provides **7 pre-built structural query tools** for analyzing code relationships:
+
+### 1. **query_callers** - Find Function Callers
+```python
+# Find all functions that call a target function
+query_callers(function_name="auth.services.UserService.authenticate", max_depth=1)
+```
+**Use for**: Impact analysis before modifying functions, understanding function dependencies
+
+### 2. **query_hierarchy** - Explore Class Hierarchies
+```python
+# Show class inheritance tree (ancestors, descendants, or both)
+query_hierarchy(class_name="auth.models.BaseAuth", direction="both", max_depth=10)
+```
+**Use for**: Safe base class refactoring, understanding OOP relationships
+
+### 3. **query_dependencies** - Analyze Module Dependencies
+```python
+# Find all imports and function calls for a module
+query_dependencies(target="auth.services", dependency_type="all")
+```
+**Use for**: Module extraction, dependency cleanup, identifying coupling
+
+### 4. **query_implementations** - Find Interface Implementations
+```python
+# Find all classes implementing an interface or extending a base class
+query_implementations(interface_name="auth.interfaces.PaymentProvider")
+```
+**Use for**: Ensuring interface consistency, finding all implementations
+
+### 5. **query_module_exports** - List Module Exports
+```python
+# Retrieve all public exports from a module
+query_module_exports(module_name="auth.services", include_private=False)
+```
+**Use for**: Understanding module public API, identifying exports
+
+### 6. **query_call_graph** - Generate Call Graphs
+```python
+# Generate call graph from an entry point
+query_call_graph(entry_point="app.main", max_depth=3, max_nodes=50)
+```
+**Use for**: Understanding execution flow, visualizing call chains
+
+### 7. **query_cypher** - Expert Mode Custom Queries
+```python
+# Execute custom Cypher queries for complex patterns
+query_cypher(query="MATCH (f:Function)-[:CALLS]->(g:Function) WHERE f.name CONTAINS 'login' RETURN f, g")
+```
+**Use for**: Complex custom queries not covered by pre-built tools
+
+**Performance**: All queries respond in <50ms for typical codebases (<10K nodes), <100ms for graph traversals
+
+**Tool Separation**: For semantic/keyword search, use [vector-search-mcp](https://github.com/your-org/vector-search-mcp). For documentation search, use [mcp-ragdocs](https://github.com/your-org/mcp-ragdocs).
 
 ## 🏗️ Architecture
 

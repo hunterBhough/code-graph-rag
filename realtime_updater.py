@@ -94,6 +94,7 @@ def start_watcher(
         host=host,
         port=port,
         batch_size=effective_batch_size,
+        project_name=repo_path_obj.name,
     ) as ingestor:
         updater = GraphUpdater(ingestor, repo_path_obj, parsers, queries)
 

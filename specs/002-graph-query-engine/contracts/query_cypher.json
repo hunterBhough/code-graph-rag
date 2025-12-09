@@ -1,0 +1,82 @@
+{
+  "name": "query_cypher",
+  "description": "Execute a custom Cypher query against the code knowledge graph (expert mode). Requires knowledge of the graph schema (Function, Class, Module nodes with CALLS, INHERITS, IMPORTS relationships). For simple queries like finding callers or exploring hierarchies, prefer the pre-built query tools (query_callers, query_hierarchy, query_dependencies, query_exports, query_implementations, query_call_graph) which are optimized and easier to use.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "Cypher query string. Example: 'MATCH (f:Function) WHERE f.name CONTAINS $pattern RETURN f.qualified_name LIMIT 10'"
+      },
+      "parameters": {
+        "type": "object",
+        "description": "Query parameters for parameterized queries. Example: {'pattern': 'login'} (default: {})",
+        "default": {}
+      },
+      "limit": {
+        "type": "integer",
+        "description": "Maximum number of rows to return. Results will be truncated if exceeded. (default: 50)",
+        "default": 50,
+        "minimum": 1,
+        "maximum": 1000
+      }
+    },
+    "required": ["query"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {"type": "string", "description": "Executed Cypher query"},
+      "rows": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "description": "Query result rows (structure depends on RETURN clause)"
+        },
+        "description": "Query results"
+      },
+      "columns": {
+        "type": "array",
+        "items": {"type": "string"},
+        "description": "Column names from RETURN clause"
+      },
+      "row_count": {
+        "type": "integer",
+        "description": "Number of rows returned"
+      },
+      "truncated": {
+        "type": "boolean",
+        "description": "Whether results were truncated at limit"
+      },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "row_count": {"type": "integer"},
+          "total_count": {"type": "integer"},
+          "truncated": {"type": "boolean"},
+          "execution_time_ms": {"type": "number"}
+        }
+      }
+    }
+  },
+  "schema_reference": {
+    "node_types": [
+      {"label": "Project", "properties": ["name"], "description": "Project container (for isolation)"},
+      {"label": "Module", "properties": ["qualified_name", "name", "path", "extension"], "description": "Code module/file"},
+      {"label": "Package", "properties": ["qualified_name", "name", "path"], "description": "Code package/directory"},
+      {"label": "Class", "properties": ["qualified_name", "name", "file_path", "line_start", "line_end"], "description": "Class definition"},
+      {"label": "Function", "properties": ["qualified_name", "name", "file_path", "line_start", "line_end", "decorators"], "description": "Standalone function"},
+      {"label": "Method", "properties": ["qualified_name", "name", "class_name", "file_path", "line_start", "line_end", "decorators"], "description": "Class method"},
+      {"label": "File", "properties": ["path", "name", "extension"], "description": "Source file"},
+      {"label": "ExternalPackage", "properties": ["name"], "description": "Third-party package"}
+    ],
+    "relationship_types": [
+      {"type": "CONTAINS", "from": "Project", "to": "*", "description": "Project isolation (all nodes belong to a project)"},
+      {"type": "DEFINES", "from": "Module", "to": "Function|Class|Method", "description": "Module defines code entities"},
+      {"type": "CALLS", "from": "Function|Method", "to": "Function|Method", "description": "Function/method calls another"},
+      {"type": "INHERITS", "from": "Class", "to": "Class", "description": "Class inherits from parent class"},
+      {"type": "IMPLEMENTS", "from": "Class", "to": "Class", "description": "Class implements interface"},
+      {"type": "IMPORTS", "from": "Module|Function", "to": "Module|ExternalPackage", "description": "Import dependency"}
+    ]
+  }
+}

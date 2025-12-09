@@ -14,9 +14,11 @@ def get_embedding_config() -> dict[str, str]:
     Returns:
         Dict with endpoint URL and model name
     """
+    from codebase_rag.config import settings
+
     return {
-        "endpoint": "http://192.168.0.121:8081",
-        "model": "bge-m3",
+        "endpoint": settings.EMBEDDING_ENDPOINT,
+        "model": settings.EMBEDDING_MODEL,
     }
 
 

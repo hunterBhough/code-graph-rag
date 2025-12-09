@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import UTC, datetime
+import re
 from typing import Any
 
 import mgclient
@@ -9,15 +10,25 @@ from loguru import logger
 class MemgraphIngestor:
     """Handles all communication and query execution with the Memgraph database."""
 
-    def __init__(self, host: str, port: int, batch_size: int = 1000):
+    def __init__(self, host: str, port: int, batch_size: int = 1000, project_name: str = ""):
         self._host = host
         self._port = port
         if batch_size < 1:
             raise ValueError("batch_size must be a positive integer")
+        if not project_name:
+            raise ValueError("project_name is required (use '__all__' for multi-project queries)")
         self.batch_size = batch_size
+        self.project_name = project_name
+        # Skip Project relationships for special '__all__' project (used for exports/multi-project queries)
+        self._skip_project_isolation = (project_name == "__all__")
+
         self.conn: mgclient.Connection | None = None
         self.node_buffer: list[tuple[str, dict[str, Any]]] = []
         self.relationship_buffer: list[tuple[tuple, str, tuple, dict | None]] = []
+        # Node types that should be linked to Project via CONTAINS relationship
+        self._project_containable_nodes = {
+            "Package", "Folder", "Module", "Class", "Function", "Method", "File"
+        }
         self.unique_constraints = {
             "Project": "name",
             "Package": "qualified_name",
@@ -140,8 +151,21 @@ class MemgraphIngestor:
         logger.info("Constraints checked/created.")
 
     def ensure_node_batch(self, label: str, properties: dict[str, Any]) -> None:
-        """Adds a node to the buffer."""
+        """Adds a node to the buffer and creates Project CONTAINS relationship if applicable."""
         self.node_buffer.append((label, properties))
+
+        # Automatically create Project CONTAINS relationship for code nodes (unless disabled)
+        if not self._skip_project_isolation and label in self._project_containable_nodes:
+            # Get the unique identifier for this node
+            id_key = self.unique_constraints.get(label)
+            if id_key and id_key in properties:
+                node_id = properties[id_key]
+                self.ensure_relationship_batch(
+                    from_spec=("Project", "name", self.project_name),
+                    rel_type="CONTAINS",
+                    to_spec=(label, id_key, node_id),
+                )
+
         if len(self.node_buffer) >= self.batch_size:
             logger.debug(
                 "Node buffer reached batch size ({}). Performing incremental flush.",
@@ -290,6 +314,43 @@ class MemgraphIngestor:
         """Executes a query and fetches all results."""
         logger.debug(f"Executing fetch query: {query} with params: {params}")
         return self._execute_query(query, params)
+
+    def execute_structural_query(
+        self, query: str, params: dict[str, Any] | None = None, query_name: str = "structural_query"
+    ) -> tuple[list[dict[str, Any]], float]:
+        """Execute a structural query with performance logging.
+
+        Args:
+            query: Cypher query string
+            params: Query parameters
+            query_name: Name of the query for logging
+
+        Returns:
+            Tuple of (results, execution_time_ms)
+        """
+        start_time = datetime.now(UTC)
+        logger.debug(f"[{query_name}] Executing: {query}")
+        logger.debug(f"[{query_name}] Parameters: {params}")
+
+        try:
+            results = self._execute_query(query, params)
+            end_time = datetime.now(UTC)
+            execution_time_ms = (end_time - start_time).total_seconds() * 1000
+
+            logger.info(
+                f"[{query_name}] Completed in {execution_time_ms:.2f}ms, "
+                f"returned {len(results)} rows"
+            )
+
+            return results, execution_time_ms
+
+        except Exception as e:
+            end_time = datetime.now(UTC)
+            execution_time_ms = (end_time - start_time).total_seconds() * 1000
+            logger.error(
+                f"[{query_name}] Failed after {execution_time_ms:.2f}ms: {e}"
+            )
+            raise
 
     def execute_write(self, query: str, params: dict[str, Any] | None = None) -> None:
         """Executes a write query without returning results."""

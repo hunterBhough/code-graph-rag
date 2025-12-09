@@ -630,6 +630,15 @@ class DependencyAnalysisQuery(StructuralQueryTool):
         Returns:
             Formatted result dictionary with dependencies and metadata
         """
+        # Validate dependency_type parameter
+        if dependency_type not in ("imports", "calls", "all"):
+            return create_error_response(
+                error_type="INVALID_PARAMETER",
+                message=f'Invalid dependency_type parameter. Must be "imports", "calls", or "all" (got "{dependency_type}")',
+                suggestion='Use dependency_type="all" to see complete dependencies',
+                provided_input={"target": target, "dependency_type": dependency_type},
+            )
+
         try:
             imports = []
             calls = []
@@ -1442,6 +1451,16 @@ class ExpertModeQuery(StructuralQueryTool):
         """
         query_upper = query.upper().strip()
 
+        # Prevent CREATE operations (check before other CREATE variants)
+        # Must check for plain CREATE before checking CREATE INDEX/CONSTRAINT
+        if "CREATE" in query_upper and "CREATE INDEX" not in query_upper and "CREATE CONSTRAINT" not in query_upper:
+            return create_error_response(
+                error_type="FORBIDDEN_OPERATION",
+                message="Destructive operation 'CREATE' is not allowed in expert mode",
+                suggestion="Expert mode is read-only. Use MATCH, RETURN, WHERE, ORDER BY, LIMIT for queries.",
+                provided_input={"query": query[:100]},
+            )
+
         # Prevent destructive operations
         destructive_keywords = ["DELETE", "DETACH DELETE", "DROP", "CREATE INDEX", "CREATE CONSTRAINT"]
         for keyword in destructive_keywords:
@@ -1916,6 +1935,15 @@ class ClassHierarchyQuery(StructuralQueryTool):
         Returns:
             Formatted result dictionary with hierarchy and metadata
         """
+        # Validate direction parameter
+        if direction not in ("up", "down", "both"):
+            return create_error_response(
+                error_type="INVALID_PARAMETER",
+                message=f'Invalid direction parameter. Must be "up", "down", or "both" (got "{direction}")',
+                suggestion='Use direction="both" to see complete hierarchy',
+                provided_input={"class_name": class_name, "direction": direction},
+            )
+
         # Validate parameters
         if max_depth < 1 or max_depth > 10:
             return create_error_response(
@@ -2197,7 +2225,7 @@ class ModuleExportsQuery(StructuralQueryTool):
             labels(export) AS type,
             export.file_path AS file_path,
             export.line_start AS line_number
-        ORDER BY type, short_name
+        ORDER BY labels(export)[0], short_name
         """
         params = {"name": module_name}
 

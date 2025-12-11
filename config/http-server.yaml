@@ -1,0 +1,31 @@
+# HTTP Server Configuration for code-graph-rag
+# Standard configuration for MCP HTTP wrapper
+
+service:
+  name: "code-graph-rag"
+  port: 8001
+  host: "127.0.0.1"  # Use localhost for development; change to 0.0.0.0 for container deployment
+
+server:
+  workers: 1
+  timeout: 30  # Request timeout in seconds
+  graceful_shutdown_seconds: 5  # Time to wait for in-flight requests during shutdown
+
+monitoring:
+  metrics_enabled: false
+  health_check_interval: 30  # Seconds between background dependency health checks
+
+security:
+  api_keys_enabled: false
+  rate_limit: 1000  # Max requests per minute per client
+  cors:
+    enabled: true
+    allowed_origins:
+      - "http://localhost:*"
+      - "http://127.0.0.1:*"
+
+dependencies:
+  memgraph:
+    host: "localhost"
+    port: 7687
+    timeout: 1000  # Connection timeout in milliseconds

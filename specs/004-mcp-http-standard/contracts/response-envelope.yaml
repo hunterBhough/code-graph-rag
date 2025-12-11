@@ -1,0 +1,163 @@
+# Response Envelope Schema
+# Standardized response format for all MCP HTTP services
+
+$schema: http://json-schema.org/draft-07/schema#
+$id: https://mcp-http-gateway/schemas/response-envelope.json
+title: ResponseEnvelope
+description: Standard response structure returned by all HTTP endpoints
+
+type: object
+required:
+  - success
+  - request_id
+  - timestamp
+
+properties:
+  success:
+    type: boolean
+    description: Indicates whether the request succeeded
+    examples:
+      - true
+      - false
+
+  data:
+    type: object
+    description: |
+      Response payload when success=true.
+      MUST be present when success=true.
+      MUST be null/absent when success=false.
+    additionalProperties: true
+    examples:
+      - callers: ["function_a", "function_b"]
+      - result: "Generated text here"
+      - matches: []
+
+  error:
+    type: string
+    description: |
+      Human-readable error message when success=false.
+      MUST be present when success=false.
+      MUST be null/absent when success=true.
+      Should provide actionable information for debugging.
+    minLength: 1
+    examples:
+      - "Tool not found: invalid_tool_name"
+      - "Invalid arguments: 'max_depth' must be between 1 and 10"
+      - "Database connection failed: Memgraph unreachable"
+
+  code:
+    type: string
+    description: |
+      Machine-readable error code when success=false.
+      MUST be present when success=false.
+      MUST be null/absent when success=true.
+      See error-codes.yaml for complete list.
+    enum:
+      - TOOL_NOT_FOUND
+      - INVALID_ARGUMENTS
+      - EXECUTION_ERROR
+      - INTERNAL_ERROR
+      - TIMEOUT
+      - RATE_LIMITED
+      - SERVICE_UNAVAILABLE
+    examples:
+      - "TOOL_NOT_FOUND"
+      - "INVALID_ARGUMENTS"
+      - "EXECUTION_ERROR"
+
+  request_id:
+    type: string
+    format: uuid
+    description: |
+      UUID for request correlation.
+      Echoed from request if client provided.
+      Auto-generated (UUID v4) if client omitted.
+      Used for log correlation and debugging.
+    pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    examples:
+      - "550e8400-e29b-41d4-a716-446655440000"
+
+  timestamp:
+    type: string
+    format: date-time
+    description: |
+      ISO 8601 timestamp of response generation.
+      MUST include milliseconds and Z timezone.
+      Format: YYYY-MM-DDTHH:MM:SS.sssZ
+    pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    examples:
+      - "2025-12-09T12:34:56.789Z"
+
+  meta:
+    type: object
+    description: |
+      Optional metadata about the request/response.
+      Common fields: execution_time_ms, rate_limit_remaining, pagination
+    additionalProperties: true
+    properties:
+      execution_time_ms:
+        type: integer
+        description: Time taken to execute the request (milliseconds)
+        minimum: 0
+        examples:
+          - 150
+      rate_limit_remaining:
+        type: integer
+        description: Number of requests remaining in current rate limit window
+        minimum: 0
+        examples:
+          - 950
+      pagination:
+        type: object
+        description: Pagination metadata (for paginated results)
+        properties:
+          total_count:
+            type: integer
+            minimum: 0
+          page:
+            type: integer
+            minimum: 1
+          page_size:
+            type: integer
+            minimum: 1
+
+# Validation Rules (enforced at runtime, documented here)
+# 1. If success=true: data MUST be present, error and code MUST be absent
+# 2. If success=false: error and code MUST be present, data MUST be absent
+# 3. request_id MUST be valid UUID v4
+# 4. timestamp MUST be ISO 8601 with milliseconds and Z timezone
+# 5. meta.execution_time_ms MUST be non-negative if present
+
+examples:
+  - # Success response
+    success: true
+    data:
+      callers: ["function_a", "function_b"]
+    request_id: "550e8400-e29b-41d4-a716-446655440000"
+    timestamp: "2025-12-09T12:34:56.789Z"
+    meta:
+      execution_time_ms: 150
+
+  - # Error response (tool not found)
+    success: false
+    error: "Tool not found: invalid_tool_name"
+    code: "TOOL_NOT_FOUND"
+    request_id: "550e8400-e29b-41d4-a716-446655440001"
+    timestamp: "2025-12-09T12:34:57.123Z"
+
+  - # Error response (invalid arguments)
+    success: false
+    error: "Invalid arguments: 'max_depth' must be between 1 and 10"
+    code: "INVALID_ARGUMENTS"
+    request_id: "550e8400-e29b-41d4-a716-446655440002"
+    timestamp: "2025-12-09T12:34:58.456Z"
+
+  - # Success with metadata
+    success: true
+    data:
+      results: []
+    request_id: "550e8400-e29b-41d4-a716-446655440003"
+    timestamp: "2025-12-09T12:34:59.789Z"
+    meta:
+      execution_time_ms: 45
+      rate_limit_remaining: 950

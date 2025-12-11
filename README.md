@@ -569,6 +569,151 @@ The agent will incorporate the guidance from your reference documents when sugge
 - `--batch-size`: Override Memgraph flush batch size (defaults to `MEMGRAPH_BATCH_SIZE` in settings)
 - `--reference-document`: Path to reference documentation (optimization only)
 
+## 🌐 HTTP Server (REST API Access)
+
+Graph-Code provides a standardized HTTP server that exposes all MCP tools via REST endpoints, enabling integration with any HTTP client or service.
+
+### Quick Start
+
+```bash
+# Start HTTP server with default configuration (port 8001)
+uv run python -m codebase_rag.http
+
+# Override host and port
+uv run python -m codebase_rag.http --host 0.0.0.0 --port 9000
+
+# Use custom configuration file
+uv run python -m codebase_rag.http --config /path/to/custom-config.yaml
+
+# Enable auto-reload for development
+uv run python -m codebase_rag.http --reload --log-level debug
+```
+
+### HTTP Endpoints
+
+- **POST /call-tool** - Execute any MCP tool with standardized request/response
+- **GET /tools** - Discover available tools with JSON schemas
+- **GET /health** - Check service health and dependency status
+
+### Example: Query Function Callers via HTTP
+
+```bash
+# Execute query_callers tool
+curl -X POST http://localhost:8001/call-tool \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tool": "query_callers",
+    "arguments": {
+      "function_name": "codebase_rag.services.graph_service.MemgraphIngestor.ensure_node_batch",
+      "max_depth": 3
+    }
+  }' | jq
+
+# Response:
+# {
+#   "success": true,
+#   "data": {
+#     "callers": ["function_a", "function_b"]
+#   },
+#   "request_id": "550e8400-e29b-41d4-a716-446655440000",
+#   "timestamp": "2025-12-09T12:34:56.789Z",
+#   "meta": {
+#     "execution_time_ms": 150
+#   }
+# }
+```
+
+### Configuration
+
+The HTTP server uses `config/http-server.yaml` for configuration:
+
+```yaml
+service:
+  name: "code-graph-rag"
+  port: 8001
+  host: "127.0.0.1"
+
+server:
+  workers: 1
+  timeout: 30
+  graceful_shutdown_seconds: 5
+
+monitoring:
+  health_check_interval: 30
+
+security:
+  cors:
+    enabled: true
+    allowed_origins:
+      - "http://localhost:*"
+
+dependencies:
+  memgraph:
+    host: "localhost"
+    port: 7687
+```
+
+For comprehensive configuration options, see [HTTP Server Configuration Guide](docs/HTTP_SERVER_CONFIG.md).
+
+### LaunchAgent Deployment (macOS)
+
+Deploy code-graph-rag as a native macOS service with automatic restart on failure:
+
+```bash
+# Install LaunchAgent (one-time setup)
+cd deployment/launchagents
+./install.sh
+
+# Manage service using services-manager.sh
+cd /path/to/code-graph-rag
+./services-manager.sh start        # Start service
+./services-manager.sh status       # Check status
+./services-manager.sh logs         # View logs
+./services-manager.sh restart      # Restart service
+./services-manager.sh stop         # Stop service
+```
+
+The LaunchAgent automatically:
+- Starts on system boot
+- Restarts on failure within 5 seconds
+- Logs to `deployment/launchagents/logs/`
+- Runs with KeepAlive enabled for high availability
+
+For detailed deployment instructions, see [LaunchAgent README](deployment/launchagents/README.md).
+
+### HTTP Client Wrapper Generator
+
+Automatically generate type-safe client wrappers for bash, Python, CLI tools, and skills:
+
+```bash
+# Navigate to wrapper generator (separate repository)
+cd /Users/hunter/code/ai_agency/shared/mcp-servers/http-service-wrappers
+
+# Generate wrappers for code-graph-rag
+python generator.py --service code-graph-rag
+
+# Generate specific wrapper types
+python generator.py --service code-graph-rag --type bash,python
+
+# Use generated bash script
+cd output/code-graph-rag/scripts
+./query_callers.sh "my.function" 3
+
+# Use generated Python client
+from mcp_clients.code_graph_rag import CodeGraphRagClient
+
+client = CodeGraphRagClient(base_url="http://localhost:8001")
+result = client.query_callers(function_name="my.function", max_depth=3)
+```
+
+Generated wrappers include:
+- **Bash scripts**: One script per tool with formatted output
+- **Python modules**: Type-safe clients with full IntelliSense support
+- **CLI tools**: argparse-based command-line interfaces
+- **Skills**: JSON metadata for skill registries
+
+For complete API documentation, see [HTTP API Reference](docs/HTTP_API.md).
+
 ## 🔌 MCP Server (Claude Code Integration)
 
 Graph-Code can run as an MCP (Model Context Protocol) server, enabling seamless integration with Claude Code and other MCP clients.

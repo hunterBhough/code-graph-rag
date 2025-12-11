@@ -1,0 +1,458 @@
+openapi: 3.1.0
+info:
+  title: Standardized MCP HTTP API
+  description: |
+    Unified HTTP API specification for all MCP services (ai-gateway, code-graph-rag, seekr, docwell).
+    All services MUST implement these endpoints with identical request/response formats.
+  version: 1.0.0
+  contact:
+    name: MCP HTTP Gateway
+    url: https://github.com/hunter/mcp-http-gateway
+
+servers:
+  - url: http://localhost:8000
+    description: ai-gateway
+  - url: http://localhost:8001
+    description: code-graph-rag
+  - url: http://localhost:8002
+    description: seekr
+  - url: http://localhost:8003
+    description: docwell
+
+paths:
+  /call-tool:
+    post:
+      summary: Execute a tool
+      description: |
+        Execute a specific tool with provided arguments. Returns results in standard response envelope.
+        Tool name must match one from GET /tools. Arguments are validated against tool's input schema.
+      operationId: callTool
+      tags:
+        - Tools
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToolRequest'
+            examples:
+              query_callers:
+                summary: Query function callers (code-graph-rag)
+                value:
+                  tool: query_callers
+                  arguments:
+                    function_name: "my_module.my_function"
+                    max_depth: 3
+                  request_id: "550e8400-e29b-41d4-a716-446655440000"
+              generate_text:
+                summary: Generate text (ai-gateway)
+                value:
+                  tool: generate
+                  arguments:
+                    prompt: "Write a haiku about code"
+                    model: "gpt-4"
+      responses:
+        '200':
+          description: Tool executed successfully or failed with error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEnvelope'
+              examples:
+                success:
+                  summary: Successful tool execution
+                  value:
+                    success: true
+                    data:
+                      callers: ["function_a", "function_b"]
+                    request_id: "550e8400-e29b-41d4-a716-446655440000"
+                    timestamp: "2025-12-09T12:34:56.789Z"
+                    meta:
+                      execution_time_ms: 150
+                tool_not_found:
+                  summary: Tool does not exist
+                  value:
+                    success: false
+                    error: "Tool not found: invalid_tool_name"
+                    code: "TOOL_NOT_FOUND"
+                    request_id: "550e8400-e29b-41d4-a716-446655440001"
+                    timestamp: "2025-12-09T12:34:57.123Z"
+        '400':
+          description: Invalid request (malformed JSON, invalid arguments)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEnvelope'
+              examples:
+                invalid_arguments:
+                  summary: Arguments failed validation
+                  value:
+                    success: false
+                    error: "Invalid arguments: 'max_depth' must be between 1 and 10"
+                    code: "INVALID_ARGUMENTS"
+                    request_id: "550e8400-e29b-41d4-a716-446655440002"
+                    timestamp: "2025-12-09T12:34:58.456Z"
+        '404':
+          description: Tool not found (valid request format, unknown tool name)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEnvelope'
+        '500':
+          description: Tool execution error or internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEnvelope'
+              examples:
+                execution_error:
+                  summary: Tool failed during execution
+                  value:
+                    success: false
+                    error: "Database connection failed: Memgraph unreachable"
+                    code: "EXECUTION_ERROR"
+                    request_id: "550e8400-e29b-41d4-a716-446655440003"
+                    timestamp: "2025-12-09T12:35:00.789Z"
+        '503':
+          description: Service unavailable (initializing or shutting down)
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds to wait before retrying
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEnvelope'
+              examples:
+                initializing:
+                  summary: Service still initializing
+                  value:
+                    success: false
+                    error: "Service is initializing, please retry"
+                    code: "SERVICE_UNAVAILABLE"
+                    request_id: "550e8400-e29b-41d4-a716-446655440004"
+                    timestamp: "2025-12-09T12:35:01.123Z"
+
+  /tools:
+    get:
+      summary: List available tools
+      description: |
+        Returns metadata about all tools available in this service.
+        Each tool includes name, description, and JSON Schema for input validation.
+        Wrapper generators use this endpoint to discover tool capabilities.
+      operationId: listTools
+      tags:
+        - Tools
+      responses:
+        '200':
+          description: List of available tools
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolsResponse'
+              examples:
+                code-graph-rag:
+                  summary: code-graph-rag tools
+                  value:
+                    service: "code-graph-rag"
+                    version: "0.0.24"
+                    tools:
+                      - name: "query_callers"
+                        description: "Find all functions that call a specified function"
+                        input_schema:
+                          type: object
+                          properties:
+                            function_name:
+                              type: string
+                              description: "Qualified name of the function to query"
+                            max_depth:
+                              type: integer
+                              description: "Maximum call depth to traverse"
+                              default: 3
+                              minimum: 1
+                              maximum: 10
+                          required: ["function_name"]
+                      - name: "query_hierarchy"
+                        description: "Get class inheritance hierarchy"
+                        input_schema:
+                          type: object
+                          properties:
+                            class_name:
+                              type: string
+                              description: "Qualified name of the class"
+                          required: ["class_name"]
+
+  /health:
+    get:
+      summary: Check service health
+      description: |
+        Returns service health status including uptime and dependency status.
+        Monitoring systems use this endpoint for health checks.
+        Status is "healthy" if all dependencies are connected, "degraded" if some dependencies are down,
+        or "unavailable" if service cannot fulfill requests.
+      operationId: checkHealth
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: Service is healthy or degraded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                healthy:
+                  summary: All dependencies connected
+                  value:
+                    status: "healthy"
+                    service: "code-graph-rag"
+                    version: "0.0.24"
+                    uptime_seconds: 7200
+                    dependencies:
+                      memgraph:
+                        status: "connected"
+                        response_time_ms: 8
+                    timestamp: "2025-12-09T14:30:00.000Z"
+                degraded:
+                  summary: Dependency unavailable
+                  value:
+                    status: "degraded"
+                    service: "code-graph-rag"
+                    version: "0.0.24"
+                    uptime_seconds: 7201
+                    dependencies:
+                      memgraph:
+                        status: "unavailable"
+                        error: "Connection timeout after 1000ms"
+                    timestamp: "2025-12-09T14:30:01.000Z"
+        '503':
+          description: Service is unavailable (cannot fulfill any requests)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                unavailable:
+                  summary: Service unavailable
+                  value:
+                    status: "unavailable"
+                    service: "code-graph-rag"
+                    version: "0.0.24"
+                    uptime_seconds: 0
+                    dependencies: {}
+                    timestamp: "2025-12-09T14:30:02.000Z"
+
+components:
+  schemas:
+    ToolRequest:
+      type: object
+      required:
+        - tool
+        - arguments
+      properties:
+        tool:
+          type: string
+          description: Name of the tool to execute (must match ToolSchema.name from /tools)
+          example: "query_callers"
+        arguments:
+          type: object
+          description: Tool-specific arguments (validated against tool's input_schema)
+          additionalProperties: true
+          example:
+            function_name: "my_module.my_function"
+            max_depth: 3
+        request_id:
+          type: string
+          format: uuid
+          description: Optional UUID for request correlation (auto-generated if omitted)
+          example: "550e8400-e29b-41d4-a716-446655440000"
+
+    ResponseEnvelope:
+      type: object
+      required:
+        - success
+        - request_id
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          description: Indicates whether the request succeeded
+          example: true
+        data:
+          type: object
+          description: Response payload (present when success=true)
+          additionalProperties: true
+          example:
+            callers: ["function_a", "function_b"]
+        error:
+          type: string
+          description: Human-readable error message (present when success=false)
+          example: "Tool not found: invalid_tool_name"
+        code:
+          type: string
+          enum:
+            - TOOL_NOT_FOUND
+            - INVALID_ARGUMENTS
+            - EXECUTION_ERROR
+            - INTERNAL_ERROR
+            - TIMEOUT
+            - RATE_LIMITED
+            - SERVICE_UNAVAILABLE
+          description: Machine-readable error code (present when success=false)
+          example: "TOOL_NOT_FOUND"
+        request_id:
+          type: string
+          format: uuid
+          description: UUID for request correlation (echoed from request or auto-generated)
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of response generation (with milliseconds and Z timezone)
+          example: "2025-12-09T12:34:56.789Z"
+        meta:
+          type: object
+          description: Optional metadata (execution time, rate limits, etc.)
+          additionalProperties: true
+          example:
+            execution_time_ms: 150
+
+    ToolSchema:
+      type: object
+      required:
+        - name
+        - description
+        - input_schema
+      properties:
+        name:
+          type: string
+          pattern: "^[a-zA-Z_][a-zA-Z0-9_]*$"
+          description: Unique identifier for the tool (valid Python identifier)
+          example: "query_callers"
+        description:
+          type: string
+          minLength: 1
+          description: Human-readable description of tool's purpose
+          example: "Find all functions that call a specified function"
+        input_schema:
+          type: object
+          description: JSON Schema (Draft 7) defining valid input arguments
+          required:
+            - type
+            - properties
+          properties:
+            type:
+              type: string
+              const: "object"
+            properties:
+              type: object
+              additionalProperties: true
+            required:
+              type: array
+              items:
+                type: string
+          example:
+            type: object
+            properties:
+              function_name:
+                type: string
+                description: "Qualified name of the function to query"
+              max_depth:
+                type: integer
+                description: "Maximum call depth to traverse"
+                default: 3
+                minimum: 1
+                maximum: 10
+            required: ["function_name"]
+
+    ToolsResponse:
+      type: object
+      required:
+        - service
+        - version
+        - tools
+      properties:
+        service:
+          type: string
+          description: Service name (matches ServiceConfiguration.service.name)
+          example: "code-graph-rag"
+        version:
+          type: string
+          pattern: "^\\d+\\.\\d+\\.\\d+$"
+          description: Semantic version of service
+          example: "0.0.24"
+        tools:
+          type: array
+          description: List of available tools (may be empty)
+          items:
+            $ref: '#/components/schemas/ToolSchema'
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+        - version
+        - uptime_seconds
+        - dependencies
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unavailable
+          description: Overall service health status
+          example: "healthy"
+        service:
+          type: string
+          description: Service name
+          example: "code-graph-rag"
+        version:
+          type: string
+          pattern: "^\\d+\\.\\d+\\.\\d+$"
+          description: Service version
+          example: "0.0.24"
+        uptime_seconds:
+          type: integer
+          minimum: 0
+          description: Seconds since service started
+          example: 7200
+        dependencies:
+          type: object
+          description: Map of dependency names to status objects
+          additionalProperties:
+            type: object
+            required:
+              - status
+            properties:
+              status:
+                type: string
+                enum:
+                  - connected
+                  - unavailable
+                description: Dependency connection status
+              response_time_ms:
+                type: integer
+                minimum: 0
+                description: Response time for health check (when connected)
+              error:
+                type: string
+                description: Error message (when unavailable)
+          example:
+            memgraph:
+              status: "connected"
+              response_time_ms: 8
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of health check
+          example: "2025-12-09T14:30:00.000Z"
+
+tags:
+  - name: Tools
+    description: Tool discovery and execution endpoints
+  - name: Monitoring
+    description: Health check and monitoring endpoints

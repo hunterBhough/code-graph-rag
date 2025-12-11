@@ -1,0 +1,484 @@
+openapi: 3.1.0
+info:
+  title: Code-Graph-RAG HTTP API
+  version: 0.0.24
+  description: |
+    Standardized HTTP API for code-graph-rag MCP service.
+
+    Exposes all MCP tools via REST endpoints with consistent response envelopes,
+    error handling, and request tracking.
+  contact:
+    name: Code-Graph-RAG Maintainers
+    url: https://github.com/your-org/code-graph-rag
+
+servers:
+  - url: http://localhost:8001
+    description: Local development server
+  - url: http://127.0.0.1:8001
+    description: Local development (IPv4)
+
+tags:
+  - name: tools
+    description: MCP tool execution endpoints
+  - name: discovery
+    description: Service discovery and metadata
+  - name: health
+    description: Health checks and monitoring
+
+paths:
+  /call-tool:
+    post:
+      operationId: callTool
+      summary: Execute an MCP tool
+      description: |
+        Execute any available MCP tool by name with provided arguments.
+        Returns results in standard response envelope.
+      tags:
+        - tools
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallToolRequest'
+            examples:
+              query_callers:
+                summary: Query function callers
+                value:
+                  tool: query_callers
+                  arguments:
+                    function_name: process_data
+                    max_depth: 3
+              query_hierarchy:
+                summary: Query class hierarchy
+                value:
+                  tool: query_hierarchy
+                  arguments:
+                    class_name: BaseModel
+                    direction: up
+      responses:
+        '200':
+          description: Tool executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      function_name: process_data
+                      callers:
+                        - main
+                        - batch_processor
+                    request_id: 550e8400-e29b-41d4-a716-446655440000
+                    timestamp: '2025-12-09T14:32:10.123Z'
+                    meta:
+                      execution_time_ms: 42
+        '400':
+          description: Invalid request (bad arguments or malformed JSON)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_arguments:
+                  value:
+                    success: false
+                    error: 'Invalid argument: max_depth must be between 1 and 10'
+                    code: INVALID_ARGUMENTS
+                    request_id: 550e8400-e29b-41d4-a716-446655440001
+                    timestamp: '2025-12-09T14:32:11.456Z'
+        '404':
+          description: Tool not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                tool_not_found:
+                  value:
+                    success: false
+                    error: 'Tool not found: invalid_tool'
+                    code: TOOL_NOT_FOUND
+                    request_id: 550e8400-e29b-41d4-a716-446655440002
+                    timestamp: '2025-12-09T14:32:12.789Z'
+        '408':
+          description: Tool execution timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                timeout:
+                  value:
+                    success: false
+                    error: 'Tool execution exceeded timeout of 30 seconds'
+                    code: TIMEOUT
+                    request_id: 550e8400-e29b-41d4-a716-446655440003
+                    timestamp: '2025-12-09T14:32:13.456Z'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rate_limited:
+                  value:
+                    success: false
+                    error: 'Rate limit exceeded: 1000 requests per minute'
+                    code: RATE_LIMITED
+                    request_id: 550e8400-e29b-41d4-a716-446655440004
+                    timestamp: '2025-12-09T14:32:14.123Z'
+        '500':
+          description: Internal server error or tool execution error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                execution_error:
+                  value:
+                    success: false
+                    error: 'Database query failed: Memgraph connection lost'
+                    code: EXECUTION_ERROR
+                    request_id: 550e8400-e29b-41d4-a716-446655440005
+                    timestamp: '2025-12-09T14:32:15.789Z'
+                internal_error:
+                  value:
+                    success: false
+                    error: 'Internal server error: unexpected exception'
+                    code: INTERNAL_ERROR
+                    request_id: 550e8400-e29b-41d4-a716-446655440006
+                    timestamp: '2025-12-09T14:32:16.456Z'
+
+  /tools:
+    get:
+      operationId: listTools
+      summary: List available MCP tools
+      description: |
+        Returns metadata about all available MCP tools including their
+        input schemas for validation.
+      tags:
+        - discovery
+      responses:
+        '200':
+          description: List of available tools
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInfo'
+              examples:
+                service_info:
+                  value:
+                    service: code-graph-rag
+                    version: 0.0.24
+                    tools:
+                      - name: query_callers
+                        description: Find all functions that call the specified function
+                        input_schema:
+                          type: object
+                          properties:
+                            function_name:
+                              type: string
+                            max_depth:
+                              type: integer
+                              minimum: 1
+                              maximum: 10
+                          required:
+                            - function_name
+                      - name: query_hierarchy
+                        description: Query class inheritance hierarchy
+                        input_schema:
+                          type: object
+                          properties:
+                            class_name:
+                              type: string
+                            direction:
+                              type: string
+                              enum: [up, down, both]
+                          required:
+                            - class_name
+                            - direction
+        '503':
+          description: Service unavailable (initializing)
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds to wait before retrying
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Check service health
+      description: |
+        Returns health status of HTTP server and its dependencies (Memgraph).
+        Uses cached status from background health checker.
+      tags:
+        - health
+      responses:
+        '200':
+          description: Health status (may be degraded)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+              examples:
+                healthy:
+                  summary: All dependencies healthy
+                  value:
+                    status: healthy
+                    service: code-graph-rag
+                    version: 0.0.24
+                    uptime_seconds: 3600
+                    dependencies:
+                      memgraph:
+                        status: connected
+                        latency_ms: 5
+                    timestamp: '2025-12-09T15:00:00.000Z'
+                degraded:
+                  summary: Memgraph unavailable
+                  value:
+                    status: degraded
+                    service: code-graph-rag
+                    version: 0.0.24
+                    uptime_seconds: 7200
+                    dependencies:
+                      memgraph:
+                        status: unavailable
+                    timestamp: '2025-12-09T16:00:00.000Z'
+
+components:
+  schemas:
+    CallToolRequest:
+      type: object
+      required:
+        - tool
+        - arguments
+      properties:
+        tool:
+          type: string
+          pattern: '^[a-z][a-z0-9_]*$'
+          description: Name of MCP tool to execute (snake_case)
+          example: query_callers
+        arguments:
+          type: object
+          description: Tool-specific arguments matching tool's JSON Schema
+          additionalProperties: true
+          example:
+            function_name: my_function
+            max_depth: 3
+        request_id:
+          type: string
+          format: uuid
+          description: Optional client-provided UUID for request tracking
+          example: 550e8400-e29b-41d4-a716-446655440000
+
+    SuccessResponse:
+      type: object
+      required:
+        - success
+        - data
+        - request_id
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          const: true
+          description: Indicates successful execution
+        data:
+          type: object
+          description: Tool execution results
+          additionalProperties: true
+        request_id:
+          type: string
+          format: uuid
+          description: UUID for request tracking
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of response
+        meta:
+          type: object
+          description: Optional metadata (execution time, pagination, etc.)
+          additionalProperties: true
+          properties:
+            execution_time_ms:
+              type: integer
+              description: Tool execution time in milliseconds
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+        - code
+        - request_id
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          const: false
+          description: Indicates failed execution
+        error:
+          type: string
+          description: Human-readable error message
+          example: "Tool not found: invalid_tool"
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        request_id:
+          type: string
+          format: uuid
+          description: UUID for request tracking
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of response
+
+    ErrorCode:
+      type: string
+      enum:
+        - TOOL_NOT_FOUND
+        - INVALID_ARGUMENTS
+        - EXECUTION_ERROR
+        - INTERNAL_ERROR
+        - TIMEOUT
+        - RATE_LIMITED
+      description: |
+        Machine-readable error code:
+        - TOOL_NOT_FOUND: Requested tool does not exist
+        - INVALID_ARGUMENTS: Tool arguments failed validation
+        - EXECUTION_ERROR: Tool executed but encountered runtime error
+        - INTERNAL_ERROR: Unhandled exception in HTTP server
+        - TIMEOUT: Tool execution exceeded configured timeout
+        - RATE_LIMITED: Client exceeded rate limit
+
+    ToolSchema:
+      type: object
+      required:
+        - name
+        - description
+        - input_schema
+      properties:
+        name:
+          type: string
+          pattern: '^[a-z][a-z0-9_]*$'
+          description: Tool name (snake_case identifier)
+          example: query_callers
+        description:
+          type: string
+          minLength: 10
+          maxLength: 500
+          description: Human-readable description of tool's purpose
+          example: Find all functions that call the specified function
+        input_schema:
+          type: object
+          description: JSON Schema (Draft 2020-12) for tool arguments
+          required:
+            - type
+          properties:
+            type:
+              const: object
+          additionalProperties: true
+
+    ServiceInfo:
+      type: object
+      required:
+        - service
+        - version
+        - tools
+      properties:
+        service:
+          type: string
+          description: Service name
+          example: code-graph-rag
+        version:
+          type: string
+          pattern: '^\d+\.\d+\.\d+$'
+          description: Semantic version
+          example: 0.0.24
+        tools:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolSchema'
+          description: Available MCP tools
+
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - service
+        - version
+        - uptime_seconds
+        - dependencies
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unavailable
+          description: |
+            Overall health status:
+            - healthy: All dependencies connected
+            - degraded: Some dependencies unavailable
+            - unavailable: Service shutting down
+        service:
+          type: string
+          description: Service name
+          example: code-graph-rag
+        version:
+          type: string
+          description: Semantic version
+          example: 0.0.24
+        uptime_seconds:
+          type: integer
+          minimum: 0
+          description: Seconds since server start
+          example: 3600
+        dependencies:
+          type: object
+          description: Status of external dependencies
+          additionalProperties:
+            $ref: '#/components/schemas/DependencyStatus'
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp
+
+    DependencyStatus:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - connected
+            - unavailable
+            - unknown
+          description: Connection status of dependency
+        latency_ms:
+          type: integer
+          minimum: 0
+          description: Last health check latency in milliseconds
+          example: 5
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        Optional API key authentication.
+        Enable via security.api_keys_enabled in config/http-server.yaml.
+
+security: []  # No security by default (configurable)

@@ -1,0 +1,8 @@
+{
+  "tool": "query_callers",
+  "arguments": {
+    "function_name": "process_data",
+    "max_depth": 3
+  },
+  "request_id": "550e8400-e29b-41d4-a716-446655440000"
+}

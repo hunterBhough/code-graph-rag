@@ -1,0 +1,23 @@
+{
+  "success": true,
+  "data": {
+    "function_name": "process_data",
+    "callers": [
+      {
+        "name": "main",
+        "file_path": "src/main.py",
+        "line_number": 42
+      },
+      {
+        "name": "batch_processor",
+        "file_path": "src/batch.py",
+        "line_number": 105
+      }
+    ]
+  },
+  "request_id": "550e8400-e29b-41d4-a716-446655440000",
+  "timestamp": "2025-12-09T14:32:10.123Z",
+  "meta": {
+    "execution_time_ms": 42
+  }
+}

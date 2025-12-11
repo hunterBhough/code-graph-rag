@@ -1,0 +1,153 @@
+# Standard Error Codes
+# Machine-readable error codes used across all MCP HTTP services
+
+error_codes:
+  TOOL_NOT_FOUND:
+    description: Requested tool does not exist in this service
+    http_status: 404
+    retry_strategy: do_not_retry
+    user_action: |
+      Verify the tool name against GET /tools response.
+      Tool names are case-sensitive and must match exactly.
+    examples:
+      - error: "Tool not found: invalid_tool_name"
+        context: "Client requested 'invalid_tool_name' but service only has 'query_callers'"
+      - error: "Tool not found: Query_Callers"
+        context: "Tool name is case-sensitive; should be 'query_callers'"
+
+  INVALID_ARGUMENTS:
+    description: Tool arguments failed validation against input schema
+    http_status: 400
+    retry_strategy: do_not_retry
+    user_action: |
+      Check the tool's input_schema from GET /tools.
+      Ensure all required fields are present and types match.
+    examples:
+      - error: "Invalid arguments: 'max_depth' must be between 1 and 10"
+        context: "Argument validation failed (out of range)"
+      - error: "Invalid arguments: missing required field 'function_name'"
+        context: "Required field omitted"
+      - error: "Invalid arguments: 'function_name' must be a string"
+        context: "Type mismatch (provided integer, expected string)"
+
+  EXECUTION_ERROR:
+    description: Tool execution failed due to external dependency or runtime error
+    http_status: 500
+    retry_strategy: retry_with_backoff
+    user_action: |
+      Check service logs for detailed error.
+      Verify dependencies (database, APIs) are reachable via GET /health.
+      Retry after addressing dependency issues.
+    examples:
+      - error: "Database connection failed: Memgraph unreachable at localhost:7687"
+        context: "Memgraph container stopped or not accepting connections"
+      - error: "Query execution timeout: Cypher query exceeded 30s limit"
+        context: "Complex graph query took too long"
+      - error: "File not found: /path/to/codebase"
+        context: "Tool tried to access non-existent file"
+
+  INTERNAL_ERROR:
+    description: Unexpected server error (unhandled exception, system failure)
+    http_status: 500
+    retry_strategy: retry_with_backoff
+    user_action: |
+      Report this error with request_id to service maintainers.
+      Check service logs for stack traces.
+      Retry after service restart if error persists.
+    examples:
+      - error: "Internal server error: NoneType object has no attribute 'execute'"
+        context: "Unhandled AttributeError in tool execution"
+      - error: "Internal server error: unexpected EOF while parsing"
+        context: "JSON parsing failed (should have been caught as INVALID_REQUEST)"
+
+  TIMEOUT:
+    description: Tool execution exceeded configured timeout
+    http_status: 504
+    retry_strategy: retry_with_increased_timeout
+    user_action: |
+      Reduce query complexity (e.g., lower max_depth).
+      Check service configuration for timeout settings.
+      Consider splitting large queries into smaller batches.
+    examples:
+      - error: "Tool execution timeout: query_callers exceeded 60s limit"
+        context: "Deep call graph traversal timed out"
+      - error: "Tool execution timeout: external API did not respond"
+        context: "Downstream dependency timeout"
+
+  RATE_LIMITED:
+    description: Request rejected due to rate limiting (too many requests)
+    http_status: 429
+    retry_strategy: retry_after_delay
+    user_action: |
+      Wait for rate limit window to reset (check Retry-After header).
+      Reduce request frequency.
+      Contact service admin to increase rate limit if needed.
+    examples:
+      - error: "Rate limit exceeded: 1000 requests per minute"
+        context: "Client exceeded configured rate limit"
+      - error: "Rate limit exceeded: 10 requests per second per tool"
+        context: "Per-tool rate limit exceeded"
+
+  SERVICE_UNAVAILABLE:
+    description: Service is initializing, shutting down, or otherwise unavailable
+    http_status: 503
+    retry_strategy: retry_after_delay
+    user_action: |
+      Wait for service initialization to complete (check Retry-After header).
+      If service is shutting down, wait for restart.
+      Check GET /health for service status.
+    examples:
+      - error: "Service is initializing, please retry in 5 seconds"
+        context: "Service still loading dependencies"
+      - error: "Service is shutting down gracefully"
+        context: "SIGTERM received, completing in-flight requests"
+      - error: "Service unavailable: all dependencies down"
+        context: "Critical dependencies (Memgraph) unreachable"
+
+# HTTP Status Code Mapping
+http_status_mapping:
+  200: "Success or handled error (check success field in ResponseEnvelope)"
+  400: "INVALID_ARGUMENTS - client error, do not retry"
+  404: "TOOL_NOT_FOUND - client error, do not retry"
+  429: "RATE_LIMITED - retry after delay"
+  500: "EXECUTION_ERROR or INTERNAL_ERROR - retry with backoff"
+  503: "SERVICE_UNAVAILABLE - retry after delay"
+  504: "TIMEOUT - retry with increased timeout or reduced complexity"
+
+# Retry Strategies
+retry_strategies:
+  do_not_retry:
+    description: "Error is due to client mistake; retry will fail identically"
+    recommended_action: "Fix request and resubmit"
+
+  retry_with_backoff:
+    description: "Transient error; retry with exponential backoff"
+    recommended_action: "Retry with delays: 1s, 2s, 4s, 8s, give up"
+    max_retries: 4
+
+  retry_after_delay:
+    description: "Retry after specified delay (Retry-After header)"
+    recommended_action: "Wait for Retry-After duration, then retry"
+    max_retries: 3
+
+  retry_with_increased_timeout:
+    description: "Query too complex for current timeout"
+    recommended_action: "Reduce query complexity or increase timeout config"
+    max_retries: 2
+
+# Client Implementation Notes
+client_guidelines:
+  - Always check `success` field in ResponseEnvelope first
+  - Log `request_id` for all failed requests (enables server-side debugging)
+  - Respect Retry-After header for 429 and 503 responses
+  - Implement exponential backoff for 500/504 errors
+  - Do not retry 400/404 errors (fix request instead)
+  - Include request_id in bug reports for faster resolution
+
+# Service Implementation Notes
+service_guidelines:
+  - Use specific error codes (not generic INTERNAL_ERROR when possible)
+  - Include actionable details in error messages (e.g., "Memgraph unreachable at localhost:7687")
+  - Log stack traces server-side but do not expose to clients
+  - Set Retry-After header for 429 and 503 responses
+  - Track request_id in logs for correlation

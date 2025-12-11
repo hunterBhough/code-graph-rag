@@ -114,9 +114,118 @@ docker ps | grep memgraph
 ### Running the MCP Server
 
 ```bash
-# Start server (uv handles venv automatically)
+# Start MCP server (stdio protocol)
 uv run -m mcp_server.server
+
+# Start HTTP server (REST API wrapper)
+uv run python -m codebase_rag.http
+
+# HTTP server with custom port
+uv run python -m codebase_rag.http --port 9000
+
+# HTTP server with debug logging
+uv run python -m codebase_rag.http --log-level debug --reload
 ```
+
+### HTTP Server Configuration
+
+The HTTP server provides REST API access to all MCP tools via standardized endpoints.
+
+**Default port:** `8001` (configurable in `config/http-server.yaml`)
+
+**HTTP Endpoints:**
+- `POST /call-tool` - Execute any MCP tool with uniform request/response format
+- `GET /tools` - Discover available tools with JSON schemas
+- `GET /health` - Check service health and Memgraph connectivity
+
+**Quick start:**
+```bash
+# Start with default configuration
+uv run python -m codebase_rag.http
+
+# Override host and port
+uv run python -m codebase_rag.http --host 0.0.0.0 --port 9000
+
+# Use custom config file
+uv run python -m codebase_rag.http --config /path/to/config.yaml
+
+# Development mode with auto-reload
+uv run python -m codebase_rag.http --reload --log-level debug
+```
+
+**Configuration file:** `config/http-server.yaml`
+
+**Environment variable overrides:** Use `HTTP_SERVER__<SECTION>__<KEY>` pattern:
+```bash
+# Override port
+export HTTP_SERVER__SERVICE__PORT=8002
+
+# Override Memgraph host
+export HTTP_SERVER__DEPENDENCIES__MEMGRAPH__HOST=memgraph.local
+
+# Override workers
+export HTTP_SERVER__SERVER__WORKERS=4
+```
+
+**Documentation:** See `docs/HTTP_SERVER_CONFIG.md` for comprehensive configuration guide with examples for development, production, and Docker deployments.
+
+### HTTP Client Wrapper Generator
+
+Located at: `/Users/hunter/code/ai_agency/shared/mcp-servers/http-service-wrappers`
+
+The wrapper generator automatically creates type-safe clients from the HTTP server's `/tools` endpoint:
+
+**Generated artifacts:**
+- **Bash scripts** - One per tool with formatted output and error handling
+- **Python modules** - Type-safe clients with IntelliSense support
+- **CLI tools** - argparse-based command-line interfaces
+- **Skills** - JSON metadata for skill registries
+
+**Usage:**
+```bash
+cd /Users/hunter/code/ai_agency/shared/mcp-servers/http-service-wrappers
+
+# Generate for code-graph-rag
+python generator.py --service code-graph-rag
+
+# Generate specific types only
+python generator.py --service code-graph-rag --type bash,python
+
+# Output directory: output/code-graph-rag/
+```
+
+**Generated clients example:**
+```python
+from mcp_clients.code_graph_rag import CodeGraphRagClient
+
+client = CodeGraphRagClient(base_url="http://localhost:8001")
+result = client.query_callers(function_name="my.function", max_depth=3)
+```
+
+### LaunchAgent Deployment (macOS)
+
+Code-graph-rag can be deployed as a native macOS service with automatic restart:
+
+**Location:** `deployment/launchagents/`
+
+**Service port:** `8001` (HTTP server)
+
+**Quick commands:**
+```bash
+# Install LaunchAgent (one-time)
+cd deployment/launchagents && ./install.sh
+
+# Manage service
+./services-manager.sh start      # Start service
+./services-manager.sh status     # Check status
+./services-manager.sh logs       # View logs
+./services-manager.sh restart    # Restart service
+./services-manager.sh stop       # Stop service
+```
+
+**Auto-restart:** Service automatically restarts within 5 seconds on failure (KeepAlive enabled)
+
+**Logs:** `deployment/launchagents/logs/code-graph-rag.log`
 
 ### Testing Code-Graph Functionality
 
@@ -334,6 +443,9 @@ This infrastructure was recently migrated from a centralized `codebase-intellige
 - Python 3.12+ (requires-python >= 3.12) + mcp>=1.21.1, pymgclient>=1.4.0, loguru>=0.7.3, pydantic-ai-slim>=0.2.18 (001-fix-async-handlers)
 - Memgraph (graph database at localhost:7687) (001-fix-async-handlers)
 - Python 3.12+ (requires-python >= 3.12) + pymgclient 1.4.0 (Memgraph client), tree-sitter 0.25.0 (AST parsing), mcp 1.21.1+ (MCP protocol), pydantic-ai-slim 0.2.18+ (LLM integration), loguru 0.7.3 (logging), pytest 8.4.1+ (testing) (001-fix-structural-query-bugs)
+- Python 3.12+ (existing project constraint from pyproject.toml) + FastAPI (new HTTP server), mcp>=1.21.1 (existing MCP tools), pymgclient>=1.4.0 (Memgraph), Jinja2 (wrapper generation) (004-mcp-http-standard)
+- Memgraph graph database at localhost:7687 (existing infrastructure) (004-mcp-http-standard)
+- Memgraph graph database at localhost:7687 (existing infrastructure for code-graph-rag) (004-mcp-http-standard)
 
 ## Recent Changes
 - 001-fix-db-connection: Added Python 3.14.2 (requires-python >= 3.12) + pymgclient 1.4.0, loguru 0.7.3, pydantic-settings 2.0.0

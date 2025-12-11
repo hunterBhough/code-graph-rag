@@ -11,6 +11,7 @@ dependencies = [
     "pydantic-settings>=2.0.0",
     "pymgclient>=1.4.0",
     "python-dotenv>=1.1.0",
+    "pyyaml>=6.0.0",
     "toml>=0.10.2",
     "tree-sitter-python>=0.23.6",
     "tree-sitter==0.25.0",
@@ -22,6 +23,10 @@ dependencies = [
     "click>=8.0.0",
     "pytest-xdist>=3.8.0",
     "pydantic-ai[anthropic]>=1.28.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "jinja2>=3.1.0",
+    "jsonschema>=4.20.0",
 ]
 
 [project.scripts]
@@ -84,6 +89,8 @@ python_functions = ["test_*"]
 
 [dependency-groups]
 dev = [
+    "mypy>=1.16.1",
     "pyinstaller>=6.14.1",
+    "types-pyyaml>=6.0.12.20250915",
     "types-toml>=0.10.8.20240310",
 ]

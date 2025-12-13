@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.ai-agency.graph-code</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/hunter/code/ai_agency/shared/mcp-servers/code-graph-rag/.venv/bin/python</string>
+        <string>/Users/hunter/code/ai_agency/shared/mcp-servers/code-graph-rag/http_server/server.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/hunter/code/ai_agency/shared/mcp-servers/code-graph-rag</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/hunter/Library/Logs/graph-code-stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/hunter/Library/Logs/graph-code-stderr.log</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+        <key>Crashed</key>
+        <true/>
+    </dict>
+
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PORT</key>
+        <string>9001</string>
+        <key>HOST</key>
+        <string>127.0.0.1</string>
+        <key>PYTHONUNBUFFERED</key>
+        <string>1</string>
+    </dict>
+
+    <key>SoftResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>1024</integer>
+    </dict>
+
+    <key>HardResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>2048</integer>
+    </dict>
+</dict>
+</plist>

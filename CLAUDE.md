@@ -1,451 +1,112 @@
-# CLAUDE.md
+# code-graph-rag
 
-This file provides guidance to Claude Code when working with code-graph-rag and its infrastructure.
+MCP server for structured code graph queries using Tree-sitter and Memgraph.
 
-## Repository Overview
+## AI Guidance
 
-Code-graph-rag is a **specialized graph query engine** that analyzes codebases using Tree-sitter, builds knowledge graphs in Memgraph, and enables structural relationship queries for precise codebase understanding.
+**CRITICAL:**
+- NEVER create files unless absolutely necessary
+- NEVER proactively create documentation (*.md, *.txt)
+- DO NOT add comments unless code is genuinely unclear
+- ALWAYS use fd/rg/eza (NOT find/grep/ls)
 
-**Key capabilities**:
-- Multi-language codebase analysis (Python, TypeScript, JavaScript, Go, Rust, etc.)
-- Knowledge graph storage in Memgraph
-- Natural language code querying via MCP server (translates to Cypher)
-- Structural queries: function callers, class hierarchies, dependencies, call graphs
-- **Focus**: Graph-based structural relationships (NOT semantic/keyword search)
+**This Project:**
+Indexes codebases into Memgraph knowledge graph for structural queries (class hierarchies, call graphs, dependencies, callers). Complements seekr (semantic search) and docwell (document search). Can index working project or external GitHub repos for comparison research.
 
-**Tool Separation**:
-- **code-graph-rag** (this tool): Structural relationships and graph queries
-- **vector-search-mcp**: Semantic code search and fuzzy matching
-- **mcp-ragdocs**: Documentation search
+**For details, search:**
+- Architecture → `docs/ARCHITECTURE.md`
+- Vision → `docs/VISION.md`
 
-## Infrastructure
+## Commands
 
-This repository includes infrastructure for deploying code-graph across multiple projects:
-
-### Quick Setup
-
+### Development
 ```bash
-# Initialize code-graph for a project
-./init-project-graph.sh /path/to/project
-
-# With group graph (for related projects)
-./init-project-graph.sh /path/to/project --group mcp-servers
-
-# Skip git hook
-./init-project-graph.sh /path/to/project --no-hook
+uv run graph-code index          # Index current project
+uv run graph-code chat           # Interactive query CLI
+uv run graph-code mcp            # Start MCP server
+uv run graph-code http           # Start HTTP server
 ```
 
-### What Gets Installed
-
-- `.codebase-intelligence/code-graph/` in the target project
-- Auto-generated `update.sh` script with paths to this repo
-- Post-commit hook for automatic graph updates
-- Entry in `infrastructure/registry/projects.toon`
-
-### Project Structure
-
-```
-code-graph-rag/
-├── init-project-graph.sh       # Initialize projects (NEW)
-├── infrastructure/             # Infrastructure files (NEW)
-│   ├── registry/
-│   │   └── projects.toon      # Initialized projects registry
-│   └── logs/                  # Centralized group-level logs
-├── codebase_rag/              # Main Python package
-├── mcp_server/                # MCP server implementation
-├── venv/                      # Python virtual environment
-└── docs/
-    ├── INFRASTRUCTURE.md      # Infrastructure documentation (NEW)
-    └── claude-code-setup.md   # MCP server setup
-```
-
-### Project Isolation
-
-Code-graph-rag uses **Project-based isolation** instead of separate databases:
-- All projects share the default Memgraph database (localhost:7687, Lab UI at localhost:3000)
-- Each project gets a `Project` node (e.g., `Project {name: "my-project"}`)
-- All code nodes have `CONTAINS` relationships from their Project node
-- Queries filter by Project using relationship patterns
-
-This approach works with Memgraph Community Edition (no enterprise license required).
-
-## Common Tasks
-
-### Initialize a New Project
-
+### Database
 ```bash
-./init-project-graph.sh /path/to/project [--group <name>] [--no-hook]
+docker compose up -d             # Start Memgraph
+docker compose down              # Stop Memgraph
 ```
 
-### Update Documentation
-
-When updating infrastructure or adding features:
-1. Update `docs/INFRASTRUCTURE.md` - Infrastructure details
-2. Update this `CLAUDE.md` - Claude Code guidance
-3. Update `README.md` - User-facing documentation
-
-### View Project Registry
-
+### Quality
 ```bash
-cat infrastructure/registry/projects.toon
+uv run pytest                    # Run tests
+uv run ruff check                # Lint code
+uv run mypy codebase_rag         # Type check
 ```
 
-### Check Group Logs
+## Common Workflows
 
+### Indexing a Project
+1. Start Memgraph: `docker compose up -d`
+2. Index codebase: `uv run graph-code index`
+3. Query interactively: `uv run graph-code chat`
+
+### Using as MCP Server
+1. Start server: `uv run graph-code mcp`
+2. Configure in Claude Desktop MCP settings
+3. Use tools: `index_repository`, `query_code_graph`, `query_callers`, etc.
+
+### Querying Code Structure
 ```bash
-tail -f infrastructure/logs/<group-name>.log
+# Find who calls a function
+uv run graph-code chat "Who calls UserService.create_user?"
+
+# Get class hierarchy
+uv run graph-code chat "Show inheritance tree for BaseModel"
+
+# Find dependencies
+uv run graph-code chat "What modules does auth.py depend on?"
 ```
 
-### Troubleshoot Updates
-
-```bash
-# Check project update logs
-tail -f /path/to/project/.codebase-intelligence/code-graph/update.log
-
-# Run manual update
-/path/to/project/.codebase-intelligence/code-graph/update.sh
-
-# Check Memgraph
-docker ps | grep memgraph
-```
-
-## Development Workflow
-
-### Running the MCP Server
-
-```bash
-# Start MCP server (stdio protocol)
-uv run -m mcp_server.server
-
-# Start HTTP server (REST API wrapper)
-uv run python -m codebase_rag.http
-
-# HTTP server with custom port
-uv run python -m codebase_rag.http --port 9000
-
-# HTTP server with debug logging
-uv run python -m codebase_rag.http --log-level debug --reload
-```
-
-### HTTP Server Configuration
-
-The HTTP server provides REST API access to all MCP tools via standardized endpoints.
-
-**Default port:** `8001` (configurable in `config/http-server.yaml`)
-
-**HTTP Endpoints:**
-- `POST /call-tool` - Execute any MCP tool with uniform request/response format
-- `GET /tools` - Discover available tools with JSON schemas
-- `GET /health` - Check service health and Memgraph connectivity
-
-**Quick start:**
-```bash
-# Start with default configuration
-uv run python -m codebase_rag.http
-
-# Override host and port
-uv run python -m codebase_rag.http --host 0.0.0.0 --port 9000
-
-# Use custom config file
-uv run python -m codebase_rag.http --config /path/to/config.yaml
-
-# Development mode with auto-reload
-uv run python -m codebase_rag.http --reload --log-level debug
-```
-
-**Configuration file:** `config/http-server.yaml`
-
-**Environment variable overrides:** Use `HTTP_SERVER__<SECTION>__<KEY>` pattern:
-```bash
-# Override port
-export HTTP_SERVER__SERVICE__PORT=8002
-
-# Override Memgraph host
-export HTTP_SERVER__DEPENDENCIES__MEMGRAPH__HOST=memgraph.local
-
-# Override workers
-export HTTP_SERVER__SERVER__WORKERS=4
-```
-
-**Documentation:** See `docs/HTTP_SERVER_CONFIG.md` for comprehensive configuration guide with examples for development, production, and Docker deployments.
-
-### HTTP Client Wrapper Generator
-
-Located at: `/Users/hunter/code/ai_agency/shared/mcp-servers/http-service-wrappers`
-
-The wrapper generator automatically creates type-safe clients from the HTTP server's `/tools` endpoint:
-
-**Generated artifacts:**
-- **Bash scripts** - One per tool with formatted output and error handling
-- **Python modules** - Type-safe clients with IntelliSense support
-- **CLI tools** - argparse-based command-line interfaces
-- **Skills** - JSON metadata for skill registries
-
-**Usage:**
-```bash
-cd /Users/hunter/code/ai_agency/shared/mcp-servers/http-service-wrappers
-
-# Generate for code-graph-rag
-python generator.py --service code-graph-rag
-
-# Generate specific types only
-python generator.py --service code-graph-rag --type bash,python
-
-# Output directory: output/code-graph-rag/
-```
-
-**Generated clients example:**
-```python
-from mcp_clients.code_graph_rag import CodeGraphRagClient
-
-client = CodeGraphRagClient(base_url="http://localhost:8001")
-result = client.query_callers(function_name="my.function", max_depth=3)
-```
-
-### LaunchAgent Deployment (macOS)
-
-Code-graph-rag can be deployed as a native macOS service with automatic restart:
-
-**Location:** `deployment/launchagents/`
-
-**Service port:** `8001` (HTTP server)
-
-**Quick commands:**
-```bash
-# Install LaunchAgent (one-time)
-cd deployment/launchagents && ./install.sh
-
-# Manage service
-./services-manager.sh start      # Start service
-./services-manager.sh status     # Check status
-./services-manager.sh logs       # View logs
-./services-manager.sh restart    # Restart service
-./services-manager.sh stop       # Stop service
-```
-
-**Auto-restart:** Service automatically restarts within 5 seconds on failure (KeepAlive enabled)
-
-**Logs:** `deployment/launchagents/logs/code-graph-rag.log`
-
-### Testing Code-Graph Functionality
-
-```bash
-# Run tests
-make test
-
-# Run specific test
-uv run pytest tests/test_infrastructure.py
-
-# Run stress tests
-uv run stress_test.py
-
-# Run project isolation test
-uv run test_project_isolation.py
-```
-
-### Project-Based Isolation (Community Edition)
-
-Code-graph-rag uses **Project-based isolation** via `CONTAINS` relationships. This approach works with Memgraph Community Edition (no enterprise license required).
-
-**How it works:**
-1. Each indexed project creates a `Project` node with `name = project_name`
-2. All code nodes (Module, Class, Function, Method, etc.) automatically get a `CONTAINS` relationship from their Project
-3. Queries can filter by Project using relationship patterns
-
-```python
-from codebase_rag.services.graph_service import MemgraphIngestor
-
-# Index project A
-with MemgraphIngestor(
-    host='localhost',
-    port=7687,
-    project_name='my-project-a'  # Enables Project isolation
-) as ingestor:
-    # All nodes will automatically get: (Project {name: 'my-project-a'})-[:CONTAINS]->(node)
-    ingestor.ensure_node_batch("Module", {"qualified_name": "my-project-a.module"})
-    ingestor.flush_all()
-
-# Query only project A's code
-with MemgraphIngestor(host='localhost', port=7687) as ingestor:
-    results = ingestor.fetch_all("""
-        MATCH (p:Project {name: 'my-project-a'})-[:CONTAINS*]->(f:Function)
-        RETURN f.qualified_name
-    """)
-```
-
-**Benefits over database switching:**
-- ✅ Works with Community Edition (free)
-- ✅ Single database, simpler deployment
-- ✅ Cross-project queries possible when needed
-- ✅ No `USE DATABASE` enterprise requirement
-
-See `test_project_isolation.py` for a complete example.
-
-### Making Changes to Infrastructure
-
-When modifying `init-project-graph.sh` or infrastructure:
-
-1. **Test on a sample project first**
-   ```bash
-   mkdir -p /tmp/test-project && cd /tmp/test-project && git init
-   /path/to/code-graph-rag/init-project-graph.sh /tmp/test-project
-   ```
-
-2. **Verify generated files**
-   ```bash
-   cat /tmp/test-project/.codebase-intelligence/code-graph/update.sh
-   cat infrastructure/registry/projects.toon
-   ```
-
-3. **Test update script**
-   ```bash
-   /tmp/test-project/.codebase-intelligence/code-graph/update.sh
-   tail -f /tmp/test-project/.codebase-intelligence/code-graph/update.log
-   ```
-
-4. **Check Memgraph** (via Lab UI at http://localhost:3000)
-   ```cypher
-   // Count nodes for test project
-   MATCH (p:Project {name: 'test-project'})-[:CONTAINS]->(n)
-   RETURN count(n);
-   ```
-
-## Important Paths
-
-- **This repo**: `/Users/hunter/code/ai_agency/shared/mcp-servers/code-graph-rag`
-- **Project registry**: `infrastructure/registry/projects.toon`
-- **Group logs**: `infrastructure/logs/`
-- **Memgraph**: `localhost:7687` (Lab: `http://localhost:3000`)
-
-## Dependencies
-
-- **Memgraph** - Graph database (via Docker Compose)
-- **Python 3.12+** - Runtime
-- **Tree-sitter** - Code parsing
-- **Docker** - For Memgraph
-
-### Start Dependencies
-
-```bash
-# Start Memgraph
-docker compose up -d
-
-# Verify
-docker ps | grep memgraph
-curl -s http://localhost:3000 | grep -q "Memgraph"
-```
-
-## Architecture Notes
-
-### Two-Level Graph Hierarchy
-
-1. **Project-level** (`codegraph_<project>`): Single project's code
-2. **Group-level** (`codegraph_<group>`): Related projects' code (parent directory)
-
-### Update Flow
+## Code Conventions
+
+- Python 3.12+ with strict type hints
+- Tree-sitter for all language parsing
+- Pydantic for data validation
+- Async/await for I/O operations
+- Tests colocated in `codebase_rag/tests/`
+
+## File Organization
 
 ```
-git commit
-  → post-commit hook
-    → .codebase-intelligence/code-graph/update.sh
-      → Activates venv in this repo
-      → Runs codebase_rag.main with --update-graph
-      → Updates project graph (codegraph_<project>)
-      → Updates group graph (codegraph_<group>) if configured
-      → Logs to .codebase-intelligence/code-graph/update.log
+codebase_rag/
+├── main.py              # CLI entry point
+├── mcp/                 # MCP server & tools
+├── http/                # HTTP server
+├── parsers/             # Language-specific parsers
+├── services/            # Core services (graph, LLM)
+├── tools/               # Query tools
+└── tests/               # Test suite
 ```
 
-### Registry Format (TOON)
+## Tool Usage
 
-```yaml
-projects:
-  - name: project-name
-    path: /absolute/path/to/project
-    group: "group-name"  # or "" for no group
-    databases: [codegraph_project-name, codegraph_group-name]
-    initialized_at: 2025-12-01T20:16:10
-```
+**ALWAYS use:**
+- `fd` for file search
+- `rg` for content search
+- `eza` for directory listing
+- `bat` for file viewing
 
-## Edge Case Handling
+**NEVER use:**
+- `find`, `grep`, `ls`, `cat`
 
-### Query Tool Edge Cases
+## Documentation Map
 
-**Non-Existent Nodes**: All structural query tools handle missing nodes gracefully:
-- Returns clear error message: `"Node not found: <qualified_name>"`
-- Suggests checking qualified name spelling or re-indexing the repository
-- No crashes or unclear errors
+**Core docs:**
+- `docs/VISION.md` - Purpose, philosophy, relationships
+- `docs/ARCHITECTURE.md` - System design, graph schema, tools
 
-**Large Result Sets**: Automatic truncation prevents overwhelming output:
-- Pre-built tools: Truncate at >100 rows, include metadata showing total count
-- Expert mode (Cypher): Truncate at >50 rows, include metadata showing total count
-- Metadata shows: `row_count`, `total_count`, `truncated` (boolean)
-
-**Empty Results**: When query returns no results:
-- Verifies target node exists in graph (provides specific error if not)
-- Returns empty results array with clear message if node exists but has no relationships
-- Example: "Function exists but has no callers"
-
-**Deep Traversals**: Performance safeguards for graph traversals:
-- Max depth limits enforced (e.g., `max_depth=5` for callers, `max_depth=10` for hierarchies)
-- Validation errors for out-of-range depths
-- Query timeouts prevent runaway queries
-
-**Circular Dependencies**: Class hierarchy tool detects circular inheritance:
-- Returns `circular_dependencies` array in metadata
-- Continues query execution, doesn't crash
-- Includes paths showing circular chains
-
-### Database Edge Cases
-
-**Connection Failures**: Graceful handling of database unavailability:
-- Clear error messages indicating Memgraph connection issues
-- Suggests checking `docker ps | grep memgraph` and restarting containers
-- No data corruption on connection loss
-
-**Missing Projects**: Project isolation queries handle missing projects:
-- Validates project exists before executing queries
-- Returns clear error if project not found
-- Suggests running index_repository if project not indexed
-
-### Performance Edge Cases
-
-**Large Codebases**: Handles codebases with >10K nodes:
-- Query performance degrades gracefully (50ms → 100ms for 10K-100K nodes)
-- Result truncation ensures response times stay predictable
-- Graph traversal depth limits prevent exponential explosion
-
-**Concurrent Queries**: Thread-safe query execution:
-- Multiple MCP tools can query simultaneously
-- Connection pooling handled by Memgraph client
-- No race conditions or data corruption
-
-## Related Documentation
-
-- **Infrastructure Guide**: `docs/INFRASTRUCTURE.md` - Comprehensive infrastructure documentation
-- **MCP Setup**: `docs/claude-code-setup.md` - Setting up as MCP server for Claude Code
-- **Main README**: `README.md` - User-facing documentation and features
-
-## Migration Context
-
-This infrastructure was recently migrated from a centralized `codebase-intelligence` system to be co-located with code-graph-rag. Key changes:
-
-- Moved from `/shared/scripts/codebase-intelligence/` to `/shared/mcp-servers/code-graph-rag/`
-- New location for registry: `infrastructure/registry/projects.toon`
-- New location for group logs: `infrastructure/logs/`
-- All project `update.sh` scripts updated with new paths
-- Initialization script renamed: `init-code-graph.sh` → `init-project-graph.sh`
+**Project registry reference:**
+`~/code/ai_agency/shared/scripts/registry/projects.json`
 
 ## Active Technologies
-- Python 3.14.2 (requires-python >= 3.12) + pymgclient 1.4.0, loguru 0.7.3, pydantic-settings 2.0.0 (001-fix-db-connection)
-- Memgraph graph database (via mgclient connection, host:port 7687) (001-fix-db-connection)
-- Python 3.12+ (requires-python >= 3.12) + pymgclient 1.4.0 (Memgraph client), tree-sitter 0.25.0 (AST parsing), mcp 1.21.1+ (MCP protocol), pydantic-ai-slim 0.2.18+ (LLM integration for NL→Cypher), loguru 0.7.3 (logging) (002-graph-query-engine)
-- Memgraph Community Edition (graph database at localhost:7687), project-based isolation via CONTAINS relationships (002-graph-query-engine)
-- Python 3.12+ (requires-python >= 3.12) + mcp>=1.21.1, pymgclient>=1.4.0, loguru>=0.7.3, pydantic-ai-slim>=0.2.18 (001-fix-async-handlers)
-- Memgraph (graph database at localhost:7687) (001-fix-async-handlers)
-- Python 3.12+ (requires-python >= 3.12) + pymgclient 1.4.0 (Memgraph client), tree-sitter 0.25.0 (AST parsing), mcp 1.21.1+ (MCP protocol), pydantic-ai-slim 0.2.18+ (LLM integration), loguru 0.7.3 (logging), pytest 8.4.1+ (testing) (001-fix-structural-query-bugs)
-- Python 3.12+ (existing project constraint from pyproject.toml) + FastAPI (new HTTP server), mcp>=1.21.1 (existing MCP tools), pymgclient>=1.4.0 (Memgraph), Jinja2 (wrapper generation) (004-mcp-http-standard)
-- Memgraph graph database at localhost:7687 (existing infrastructure) (004-mcp-http-standard)
-- Memgraph graph database at localhost:7687 (existing infrastructure for code-graph-rag) (004-mcp-http-standard)
+- Memgraph graph database (Docker container) (005-rename-to-weavr)
 
 ## Recent Changes
-- 001-fix-db-connection: Added Python 3.14.2 (requires-python >= 3.12) + pymgclient 1.4.0, loguru 0.7.3, pydantic-settings 2.0.0
+- 005-rename-to-weavr: Added Python 3.12+

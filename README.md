@@ -1,1017 +1,179 @@
-<div align="center">
-  <picture>
-    <source srcset="assets/logo-dark-any.png" media="(prefers-color-scheme: dark)">
-    <source srcset="assets/logo-light-any.png" media="(prefers-color-scheme: light)">
-    <img src="assets/logo-dark.png" alt="Graph-Code Logo" width="480">
-  </picture>
+# code-graph-rag
 
-  <p>
-  <a href="https://github.com/vitali87/code-graph-rag/stargazers">
-    <img src="https://img.shields.io/github/stars/vitali87/code-graph-rag?style=social" alt="GitHub stars" />
-  </a>
-  <a href="https://github.com/vitali87/code-graph-rag/network/members">
-    <img src="https://img.shields.io/github/forks/vitali87/code-graph-rag?style=social" alt="GitHub forks" />
-  </a>
-  <a href="https://github.com/vitali87/code-graph-rag/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/vitali87/code-graph-rag" alt="License" />
-  </a>
-</p>
-</div>
+MCP server for structured code graph queries using Tree-sitter and Memgraph.
 
-# Graph-Code: A Specialized Graph Query Engine for Any Codebases
+Answer structural questions about codebases: who calls this function, what inherits from that class, what are the circular dependencies. Complements semantic search (seekr) and document search (docwell) with precise relationship analysis.
 
-A specialized graph query engine that analyzes multi-language codebases using Tree-sitter, builds comprehensive knowledge graphs in Memgraph, and enables structural relationship queries (function calls, class hierarchies, dependencies, call graphs) for precise codebase understanding and safe refactoring. Part of a three-tool architecture alongside vector-search-mcp (semantic search) and mcp-ragdocs (documentation search).
+## Quick Start
 
+### 1. Install
 
-https://github.com/user-attachments/assets/2fec9ef5-7121-4e6c-9b68-dc8d8a835115
-
-## Latest News 🔥
-
-- **[NEW]** **Specialized Graph Query Engine**: Refactored to focus exclusively on structural code relationships (function calls, class hierarchies, dependencies). Semantic search delegated to vector-search-mcp for clearer tool separation.
-- **[NEW]** **MCP Server Integration**: Graph-Code now works as an MCP server with Claude Code! Query and edit your codebase using structural relationship queries directly from Claude Code. [Setup Guide](docs/claude-code-setup.md)
-
-## 🛠️ Makefile Updates
-
-Use the Makefile for:
-- **make install**: Install project dependencies with full language support.
-- **make python**: Install dependencies for Python only.
-- **make dev**: Setup dev environment (install deps + pre-commit hooks).
-- **make test**: Run all tests.
-- **make test-parallel**: Run tests in parallel for faster execution.
-- **make clean**: Clean up build artifacts and cache.
-- **make help**: Show available commands.
-
-## 🚀 Features
-
-- **🌍 Multi-Language Support**:
-
-  | Language | Status | Extensions | Functions | Classes/Structs | Modules | Package Detection | Additional Features |
-  |----------|--------|------------|-----------|-----------------|---------|-------------------|---------------------|
-  | ✅ Python | **Fully Supported** | `.py` | ✅ | ✅ | ✅ | `__init__.py` | Type inference, decorators, nested functions |
-  | ✅ JavaScript | **Fully Supported** | `.js`, `.jsx` | ✅ | ✅ | ✅ | - | ES6 modules, CommonJS, prototype methods, object methods, arrow functions |
-  | ✅ TypeScript | **Fully Supported** | `.ts`, `.tsx` | ✅ | ✅ | ✅ | - | Interfaces, type aliases, enums, namespaces, ES6/CommonJS modules |
-  | ✅ C++ | **Fully Supported** | `.cpp`, `.h`, `.hpp`, `.cc`, `.cxx`, `.hxx`, `.hh`, `.ixx`, `.cppm`, `.ccm` | ✅ | ✅ (classes/structs/unions/enums) | ✅ | CMakeLists.txt, Makefile | Constructors, destructors, operator overloading, templates, lambdas, C++20 modules, namespaces |
-  | ✅ Lua | **Fully Supported** | `.lua` | ✅ | ✅ (tables/modules) | ✅ | - | Local/global functions, metatables, closures, coroutines |
-  | ✅ Rust | **Fully Supported** | `.rs` | ✅ | ✅ (structs/enums) | ✅ | - | impl blocks, associated functions |
-  | ✅ Java | **Fully Supported** | `.java` | ✅ | ✅ (classes/interfaces/enums) | ✅ | package declarations | Generics, annotations, modern features (records/sealed classes), concurrency, reflection |
-  | 🚧 Go | In Development | `.go` | ✅ | ✅ (structs) | ✅ | - | Methods, type declarations |
-  | 🚧 Scala | In Development | `.scala`, `.sc` | ✅ | ✅ (classes/objects/traits) | ✅ | package declarations | Case classes, objects |
-  | 🚧 C# | In Development | `.cs` | - | - | - | - | Classes, interfaces, generics (planned) |
-- **🌳 Tree-sitter Parsing**: Uses Tree-sitter for robust, language-agnostic AST parsing
-- **📊 Knowledge Graph Storage**: Uses Memgraph to store codebase structure as an interconnected graph
-- **🗣️ Natural Language Querying**: Ask questions about your codebase in plain English
-- **🤖 AI-Powered Cypher Generation**: Supports both cloud models (Google Gemini), local models (Ollama), and OpenAI models for natural language to Cypher translation
-- **🤖 OpenAI Integration**: Leverage OpenAI models to enhance AI functionalities.
-- **📝 Code Snippet Retrieval**: Retrieves actual source code snippets for found functions/methods
-- **✍️ Advanced File Editing**: Surgical code replacement with AST-based function targeting, visual diff previews, and exact code block modifications
-- **⚡️ Shell Command Execution**: Can execute terminal commands for tasks like running tests or using CLI tools.
-- **🚀 Interactive Code Optimization**: AI-powered codebase optimization with language-specific best practices and interactive approval workflow
-- **📚 Reference-Guided Optimization**: Use your own coding standards and architectural documents to guide optimization suggestions
-- **🔗 Dependency Analysis**: Parses `pyproject.toml` to understand external dependencies
-- **🎯 Nested Function Support**: Handles complex nested functions and class hierarchies
-- **🔄 Language-Agnostic Design**: Unified graph schema across all supported languages
-
-## 🔍 Structural Query Tools
-
-Graph-Code provides **7 pre-built structural query tools** for analyzing code relationships:
-
-### 1. **query_callers** - Find Function Callers
-```python
-# Find all functions that call a target function
-query_callers(function_name="auth.services.UserService.authenticate", max_depth=1)
-```
-**Use for**: Impact analysis before modifying functions, understanding function dependencies
-
-### 2. **query_hierarchy** - Explore Class Hierarchies
-```python
-# Show class inheritance tree (ancestors, descendants, or both)
-query_hierarchy(class_name="auth.models.BaseAuth", direction="both", max_depth=10)
-```
-**Use for**: Safe base class refactoring, understanding OOP relationships
-
-### 3. **query_dependencies** - Analyze Module Dependencies
-```python
-# Find all imports and function calls for a module
-query_dependencies(target="auth.services", dependency_type="all")
-```
-**Use for**: Module extraction, dependency cleanup, identifying coupling
-
-### 4. **query_implementations** - Find Interface Implementations
-```python
-# Find all classes implementing an interface or extending a base class
-query_implementations(interface_name="auth.interfaces.PaymentProvider")
-```
-**Use for**: Ensuring interface consistency, finding all implementations
-
-### 5. **query_module_exports** - List Module Exports
-```python
-# Retrieve all public exports from a module
-query_module_exports(module_name="auth.services", include_private=False)
-```
-**Use for**: Understanding module public API, identifying exports
-
-### 6. **query_call_graph** - Generate Call Graphs
-```python
-# Generate call graph from an entry point
-query_call_graph(entry_point="app.main", max_depth=3, max_nodes=50)
-```
-**Use for**: Understanding execution flow, visualizing call chains
-
-### 7. **query_cypher** - Expert Mode Custom Queries
-```python
-# Execute custom Cypher queries for complex patterns
-query_cypher(query="MATCH (f:Function)-[:CALLS]->(g:Function) WHERE f.name CONTAINS 'login' RETURN f, g")
-```
-**Use for**: Complex custom queries not covered by pre-built tools
-
-**Performance**: All queries respond in <50ms for typical codebases (<10K nodes), <100ms for graph traversals
-
-**Tool Separation**: For semantic/keyword search, use [vector-search-mcp](https://github.com/your-org/vector-search-mcp). For documentation search, use [mcp-ragdocs](https://github.com/your-org/mcp-ragdocs).
-
-## 🏗️ Architecture
-
-The system consists of two main components:
-
-1. **Multi-language Parser**: Tree-sitter based parsing system that analyzes codebases and ingests data into Memgraph
-2. **RAG System** (`codebase_rag/`): Interactive CLI for querying the stored knowledge graph
-
-## 🏢 Infrastructure & Project Setup
-
-Code-graph-rag includes infrastructure for deploying automated code analysis across multiple projects:
-
-### Quick Project Setup
-
-```bash
-# Initialize code-graph for any project
-./init-project-graph.sh /path/to/project
-
-# With group graph (analyze related projects together)
-./init-project-graph.sh /path/to/project --group mcp-servers
-```
-
-### What Gets Installed
-
-- **Auto-update script**: `.codebase-intelligence/code-graph/update.sh` in your project
-- **Git hook**: Post-commit hook triggers graph updates automatically
-- **Knowledge graphs**: Project-level and optional group-level graphs in Memgraph
-- **Registry entry**: Project tracked in `infrastructure/registry/projects.toon`
-
-### Features
-
-- **Automated Updates**: Code graphs update automatically after each commit via git hooks
-- **Project Groups**: Share knowledge graphs across related projects (e.g., all MCP servers)
-- **Centralized Logging**: Group-level logs stored centrally, project logs stored locally
-- **Database Naming**: `codegraph_<project-name>` for projects, `codegraph_<group-name>` for groups
-
-### Documentation
-
-- **[Infrastructure Guide](docs/INFRASTRUCTURE.md)**: Comprehensive setup and usage documentation
-- **[Claude Code Guide](CLAUDE.md)**: Integration with Claude Code and development workflows
-
-## 📋 Prerequisites
-
-- Python 3.12+
-- Docker & Docker Compose (for Memgraph)
-- **cmake** (required for building pymgclient dependency)
-- **For cloud models**: Google Gemini API key
-- **For local models**: Ollama installed and running
-- `uv` package manager
-
-### Installing cmake
-
-On macOS:
-```bash
-brew install cmake
-```
-
-On Linux (Ubuntu/Debian):
-```bash
-sudo apt-get update
-sudo apt-get install cmake
-```
-
-On Linux (CentOS/RHEL):
-```bash
-sudo yum install cmake
-# or on newer versions:
-sudo dnf install cmake
-```
-
-## 🛠️ Installation
-
-```bash
-git clone https://github.com/vitali87/code-graph-rag.git
-
-cd code-graph-rag
-```
-
-2. **Install dependencies**:
-
-For basic Python support:
 ```bash
 uv sync
 ```
 
-For full multi-language support:
-```bash
-uv sync --extra treesitter-full
-```
-
-For development (including tests and pre-commit hooks):
-```bash
-make dev
-```
-
-This installs all dependencies and sets up pre-commit hooks automatically.
-
-This installs Tree-sitter grammars for all supported languages (see Multi-Language Support section).
-
-3. **Set up environment variables**:
-```bash
-cp .env.example .env
-# Edit .env with your configuration (see options below)
-```
-
-### Configuration Options
-
-The new provider-explicit configuration supports mixing different providers for orchestrator and cypher models.
-
-#### Option 1: All Ollama (Local Models)
+### 2. Start Memgraph
 
 ```bash
-# .env file
-ORCHESTRATOR_PROVIDER=ollama
-ORCHESTRATOR_MODEL=llama3.2
-ORCHESTRATOR_ENDPOINT=http://localhost:11434/v1
-
-CYPHER_PROVIDER=ollama
-CYPHER_MODEL=codellama
-CYPHER_ENDPOINT=http://localhost:11434/v1
+docker compose up -d
 ```
 
-#### Option 2: All OpenAI Models
-```bash
-# .env file
-ORCHESTRATOR_PROVIDER=openai
-ORCHESTRATOR_MODEL=gpt-4o
-ORCHESTRATOR_API_KEY=sk-your-openai-key
-
-CYPHER_PROVIDER=openai
-CYPHER_MODEL=gpt-4o-mini
-CYPHER_API_KEY=sk-your-openai-key
-```
-
-#### Option 3: All Google Models
-```bash
-# .env file
-ORCHESTRATOR_PROVIDER=google
-ORCHESTRATOR_MODEL=gemini-2.5-pro
-ORCHESTRATOR_API_KEY=your-google-api-key
-
-CYPHER_PROVIDER=google
-CYPHER_MODEL=gemini-2.5-flash
-CYPHER_API_KEY=your-google-api-key
-```
-
-#### Option 4: Mixed Providers
-```bash
-# .env file - Google orchestrator + Ollama cypher
-ORCHESTRATOR_PROVIDER=google
-ORCHESTRATOR_MODEL=gemini-2.5-pro
-ORCHESTRATOR_API_KEY=your-google-api-key
-
-CYPHER_PROVIDER=ollama
-CYPHER_MODEL=codellama
-CYPHER_ENDPOINT=http://localhost:11434/v1
-```
-
-Get your Google API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
-
-**Install and run Ollama**:
-```bash
-# Install Ollama (macOS/Linux)
-curl -fsSL https://ollama.ai/install.sh | sh
-
-# Pull required models
-ollama pull llama3.2
-# Or try other models like:
-# ollama pull llama3
-# ollama pull mistral
-# ollama pull codellama
-
-# Ollama will automatically start serving on localhost:11434
-```
-
-> **Note**: Local models provide privacy and no API costs, but may have lower accuracy compared to cloud models like Gemini.
-
-4. **Start Memgraph database**:
-```bash
-docker-compose up -d
-```
-
-## 🎯 Usage
-
-The Graph-Code system offers four main modes of operation:
-1. **Parse & Ingest**: Build knowledge graph from your codebase
-2. **Interactive Query**: Ask questions about your code in natural language
-3. **Export & Analyze**: Export graph data for programmatic analysis
-4. **AI Optimization**: Get AI-powered optimization suggestions for your code.
-5. **Editing**: Perform surgical code replacements and modifications with precise targeting.
-
-### Step 1: Parse a Repository
-
-Parse and ingest a multi-language repository into the knowledge graph:
-
-**For the first repository (clean start):**
-```bash
-python -m codebase_rag.main start --repo-path /path/to/repo1 --update-graph --clean
-```
-
-**For additional repositories (preserve existing data):**
-```bash
-python -m codebase_rag.main start --repo-path /path/to/repo2 --update-graph
-python -m codebase_rag.main start --repo-path /path/to/repo3 --update-graph
-```
-
-**Control Memgraph batch flushing:**
-```bash
-# Flush every 5,000 records instead of the default from settings
-python -m codebase_rag.main start --repo-path /path/to/repo --update-graph \
-  --batch-size 5000
-```
-
-The system automatically detects and processes files for all supported languages (see Multi-Language Support section).
-
-### Step 2: Query the Codebase
-
-Start the interactive RAG CLI:
+### 3. Index Your Project
 
 ```bash
-python -m codebase_rag.main start --repo-path /path/to/your/repo
+uv run graph-code index
 ```
 
-### Step 2.5: Real-Time Graph Updates (Optional)
-
-For active development, you can keep your knowledge graph automatically synchronized with code changes using the realtime updater. This is particularly useful when you're actively modifying code and want the AI assistant to always work with the latest codebase structure.
-
-**What it does:**
-- Watches your repository for file changes (create, modify, delete)
-- Automatically updates the knowledge graph in real-time
-- Maintains consistency by recalculating all function call relationships
-- Filters out irrelevant files (`.git`, `node_modules`, etc.)
-
-**How to use:**
-
-Run the realtime updater in a separate terminal:
+### 4. Query Interactively
 
 ```bash
-# Using Python directly
-python realtime_updater.py /path/to/your/repo
-
-# Or using the Makefile
-make watch REPO_PATH=/path/to/your/repo
+uv run graph-code chat "Who calls UserService.create_user?"
 ```
 
-**With custom Memgraph settings:**
-```bash
-# Python
-python realtime_updater.py /path/to/your/repo --host localhost --port 7687 --batch-size 1000
+## Key Capabilities
 
-# Makefile
-make watch REPO_PATH=/path/to/your/repo HOST=localhost PORT=7687 BATCH_SIZE=1000
-```
+**Structural Queries:**
+- Find function callers: "Who calls this function?"
+- Map class hierarchies: "Show inheritance tree for BaseModel"
+- Trace dependencies: "What modules does auth.py depend on?"
+- Analyze call graphs: "Show call stack for authenticate()"
+- Detect patterns: "Find functions with >5 callers"
 
-**Multi-terminal workflow:**
-```bash
-# Terminal 1: Start the realtime updater
-python realtime_updater.py ~/my-project
+**Multi-Language Support:**
+- Python, JavaScript, TypeScript
+- Go, Rust, Java, Scala
+- C, C++, Lua
 
-# Terminal 2: Run the AI assistant
-python -m codebase_rag.main start --repo-path ~/my-project
-```
+**Multiple Interfaces:**
+- MCP server for Claude Desktop
+- HTTP API for web integrations
+- CLI for interactive exploration
 
-**Performance note:** The updater currently recalculates all CALLS relationships on every file change to ensure consistency. This prevents "island" problems where changes in one file aren't reflected in relationships from other files, but may impact performance on very large codebases with frequent changes. **Note:** Optimization of this behavior is a work in progress.
+## Usage Examples
 
-**CLI Arguments:**
-- `repo_path` (required): Path to repository to watch
-- `--host`: Memgraph host (default: `localhost`)
-- `--port`: Memgraph port (default: `7687`)
-- `--batch-size`: Number of buffered nodes/relationships before flushing to Memgraph
-
-**Specify Custom Models:**
-```bash
-# Use specific local models
-python -m codebase_rag.main start --repo-path /path/to/your/repo \
-  --orchestrator ollama:llama3.2 \
-  --cypher ollama:codellama
-
-# Use specific Gemini models
-python -m codebase_rag.main start --repo-path /path/to/your/repo \
-  --orchestrator google:gemini-2.0-flash-thinking-exp-01-21 \
-  --cypher google:gemini-2.5-flash-lite-preview-06-17
-
-# Use mixed providers
-python -m codebase_rag.main start --repo-path /path/to/your/repo \
-  --orchestrator google:gemini-2.0-flash-thinking-exp-01-21 \
-  --cypher ollama:codellama
-```
-
-Example queries (works across all supported languages):
-- "Show me all classes that contain 'user' in their name"
-- "Find functions related to database operations"
-- "What methods does the User class have?"
-- "Show me functions that handle authentication"
-- "List all TypeScript components"
-- "Find Rust structs and their methods"
-- "Show me Go interfaces and implementations"
-- "Find all C++ operator overloads in the Matrix class"
-- "Show me C++ template functions with their specializations"
-- "List all C++ namespaces and their contained classes"
-- "Find C++ lambda expressions used in algorithms"
-- "Add logging to all database connection functions"
-- "Refactor the User class to use dependency injection"
-- "Convert these Python functions to async/await pattern"
-- "Add error handling to authentication methods"
-- "Optimize this function for better performance"
-
-### Step 3: Export Graph Data
-
-For programmatic access and integration with other tools, you can export the entire knowledge graph to JSON:
-
-**Export during graph update:**
-```bash
-python -m codebase_rag.main start --repo-path /path/to/repo --update-graph --clean -o my_graph.json
-```
-
-**Export existing graph without updating:**
-```bash
-python -m codebase_rag.main export -o my_graph.json
-```
-
-**Optional: adjust Memgraph batching during export:**
-```bash
-python -m codebase_rag.main export -o my_graph.json --batch-size 5000
-```
-
-**Working with exported data:**
-```python
-from codebase_rag.graph_loader import load_graph
-
-# Load the exported graph
-graph = load_graph("my_graph.json")
-
-# Get summary statistics
-summary = graph.summary()
-print(f"Total nodes: {summary['total_nodes']}")
-print(f"Total relationships: {summary['total_relationships']}")
-
-# Find specific node types
-functions = graph.find_nodes_by_label("Function")
-classes = graph.find_nodes_by_label("Class")
-
-# Analyze relationships
-for func in functions[:5]:
-    relationships = graph.get_relationships_for_node(func.node_id)
-    print(f"Function {func.properties['name']} has {len(relationships)} relationships")
-```
-
-**Example analysis script:**
-```bash
-python examples/graph_export_example.py my_graph.json
-```
-
-This provides a reliable, programmatic way to access your codebase structure without LLM restrictions, perfect for:
-- Integration with other tools
-- Custom analysis scripts
-- Building documentation generators
-- Creating code metrics dashboards
-
-### Step 4: Code Optimization
-
-For AI-powered codebase optimization with best practices guidance:
-
-**Basic optimization for a specific language:**
-```bash
-python -m codebase_rag.main optimize python --repo-path /path/to/your/repo
-```
-
-**Optimization with reference documentation:**
-```bash
-python -m codebase_rag.main optimize python \
-  --repo-path /path/to/your/repo \
-  --reference-document /path/to/best_practices.md
-```
-
-**Using specific models for optimization:**
-```bash
-python -m codebase_rag.main optimize javascript \
-  --repo-path /path/to/frontend \
-  --orchestrator google:gemini-2.0-flash-thinking-exp-01-21
-
-# Optional: override Memgraph batch flushing during optimization
-python -m codebase_rag.main optimize javascript --repo-path /path/to/frontend \
-  --batch-size 5000
-```
-
-**Supported Languages for Optimization:**
-All supported languages: `python`, `javascript`, `typescript`, `rust`, `go`, `java`, `scala`, `cpp`
-
-**How It Works:**
-1. **Analysis Phase**: The agent analyzes your codebase structure using the knowledge graph
-2. **Pattern Recognition**: Identifies common anti-patterns, performance issues, and improvement opportunities
-3. **Best Practices Application**: Applies language-specific best practices and patterns
-4. **Interactive Approval**: Presents each optimization suggestion for your approval before implementation
-5. **Guided Implementation**: Implements approved changes with detailed explanations
-
-**Example Optimization Session:**
-```
-Starting python optimization session...
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ The agent will analyze your python codebase and propose specific          ┃
-┃ optimizations. You'll be asked to approve each suggestion before          ┃
-┃ implementation. Type 'exit' or 'quit' to end the session.                 ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
-🔍 Analyzing codebase structure...
-📊 Found 23 Python modules with potential optimizations
-
-💡 Optimization Suggestion #1:
-   File: src/data_processor.py
-   Issue: Using list comprehension in a loop can be optimized
-   Suggestion: Replace with generator expression for memory efficiency
-
-   [y/n] Do you approve this optimization?
-```
-
-**Reference Document Support:**
-You can provide reference documentation (like coding standards, architectural guidelines, or best practices documents) to guide the optimization process:
+### CLI Queries
 
 ```bash
-# Use company coding standards
-python -m codebase_rag.main optimize python \
-  --reference-document ./docs/coding_standards.md
+# Find callers
+uv run graph-code chat "Who calls verify_token?"
 
-# Use architectural guidelines
-python -m codebase_rag.main optimize java \
-  --reference-document ./ARCHITECTURE.md
+# Class hierarchy
+uv run graph-code chat "Show inheritance for BaseModel"
 
-# Use performance best practices
-python -m codebase_rag.main optimize rust \
-  --reference-document ./docs/performance_guide.md
+# Dependencies
+uv run graph-code chat "What does auth.py import?"
+
+# Call graph
+uv run graph-code chat "Show call stack for login()"
 ```
 
-The agent will incorporate the guidance from your reference documents when suggesting optimizations, ensuring they align with your project's standards and architectural decisions.
+### MCP Server
 
-**Common CLI Arguments:**
-- `--orchestrator`: Specify provider:model for main operations (e.g., `google:gemini-2.0-flash-thinking-exp-01-21`, `ollama:llama3.2`)
-- `--cypher`: Specify provider:model for graph queries (e.g., `google:gemini-2.5-flash-lite-preview-06-17`, `ollama:codellama`)
-- `--repo-path`: Path to repository (defaults to current directory)
-- `--batch-size`: Override Memgraph flush batch size (defaults to `MEMGRAPH_BATCH_SIZE` in settings)
-- `--reference-document`: Path to reference documentation (optimization only)
+Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
-## 🌐 HTTP Server (REST API Access)
-
-Graph-Code provides a standardized HTTP server that exposes all MCP tools via REST endpoints, enabling integration with any HTTP client or service.
-
-### Quick Start
-
-```bash
-# Start HTTP server with default configuration (port 8001)
-uv run python -m codebase_rag.http
-
-# Override host and port
-uv run python -m codebase_rag.http --host 0.0.0.0 --port 9000
-
-# Use custom configuration file
-uv run python -m codebase_rag.http --config /path/to/custom-config.yaml
-
-# Enable auto-reload for development
-uv run python -m codebase_rag.http --reload --log-level debug
-```
-
-### HTTP Endpoints
-
-- **POST /call-tool** - Execute any MCP tool with standardized request/response
-- **GET /tools** - Discover available tools with JSON schemas
-- **GET /health** - Check service health and dependency status
-
-### Example: Query Function Callers via HTTP
-
-```bash
-# Execute query_callers tool
-curl -X POST http://localhost:8001/call-tool \
-  -H "Content-Type: application/json" \
-  -d '{
-    "tool": "query_callers",
-    "arguments": {
-      "function_name": "codebase_rag.services.graph_service.MemgraphIngestor.ensure_node_batch",
-      "max_depth": 3
+```json
+{
+  "mcpServers": {
+    "code-graph-rag": {
+      "command": "uv",
+      "args": ["run", "graph-code", "mcp"],
+      "cwd": "/path/to/code-graph-rag"
     }
-  }' | jq
-
-# Response:
-# {
-#   "success": true,
-#   "data": {
-#     "callers": ["function_a", "function_b"]
-#   },
-#   "request_id": "550e8400-e29b-41d4-a716-446655440000",
-#   "timestamp": "2025-12-09T12:34:56.789Z",
-#   "meta": {
-#     "execution_time_ms": 150
-#   }
-# }
+  }
+}
 ```
 
-### Configuration
+Available tools:
+- `index_repository` - Parse and ingest codebase
+- `query_code_graph` - Natural language structural queries
+- `query_callers` - Find function callers
+- `query_hierarchy` - Class inheritance trees
+- `query_dependencies` - Module dependencies
+- `query_call_graph` - Full call stacks
+- `get_code_snippet` - Retrieve source by qualified name
 
-The HTTP server uses `config/http-server.yaml` for configuration:
-
-```yaml
-service:
-  name: "code-graph-rag"
-  port: 8001
-  host: "127.0.0.1"
-
-server:
-  workers: 1
-  timeout: 30
-  graceful_shutdown_seconds: 5
-
-monitoring:
-  health_check_interval: 30
-
-security:
-  cors:
-    enabled: true
-    allowed_origins:
-      - "http://localhost:*"
-
-dependencies:
-  memgraph:
-    host: "localhost"
-    port: 7687
-```
-
-For comprehensive configuration options, see [HTTP Server Configuration Guide](docs/HTTP_SERVER_CONFIG.md).
-
-### LaunchAgent Deployment (macOS)
-
-Deploy code-graph-rag as a native macOS service with automatic restart on failure:
+### HTTP API
 
 ```bash
-# Install LaunchAgent (one-time setup)
-cd deployment/launchagents
-./install.sh
+# Start server
+uv run graph-code http
 
-# Manage service using services-manager.sh
-cd /path/to/code-graph-rag
-./services-manager.sh start        # Start service
-./services-manager.sh status       # Check status
-./services-manager.sh logs         # View logs
-./services-manager.sh restart      # Restart service
-./services-manager.sh stop         # Stop service
+# Query via POST
+curl -X POST http://localhost:8000/api/tools/query_callers \
+  -H "Content-Type: application/json" \
+  -d '{"params": {"qualified_name": "app.services.UserService.create_user"}}'
 ```
 
-The LaunchAgent automatically:
-- Starts on system boot
-- Restarts on failure within 5 seconds
-- Logs to `deployment/launchagents/logs/`
-- Runs with KeepAlive enabled for high availability
+## Project Structure
 
-For detailed deployment instructions, see [LaunchAgent README](deployment/launchagents/README.md).
+```
+codebase_rag/
+├── main.py              # CLI entry point
+├── mcp/                 # MCP server & tools
+├── http/                # HTTP server
+├── parsers/             # Language-specific parsers
+├── services/            # Core services (graph, LLM)
+├── tools/               # Query tools
+└── tests/               # Test suite
+```
 
-### HTTP Client Wrapper Generator
+## Requirements
 
-Automatically generate type-safe client wrappers for bash, Python, CLI tools, and skills:
+- Python 3.12+
+- Docker (for Memgraph)
+- UV package manager
+
+## Configuration
+
+Create `.env` file:
 
 ```bash
-# Navigate to wrapper generator (separate repository)
-cd /Users/hunter/code/ai_agency/shared/mcp-servers/http-service-wrappers
+# Memgraph
+MEMGRAPH_HOST=localhost
+MEMGRAPH_PORT=7687
 
-# Generate wrappers for code-graph-rag
-python generator.py --service code-graph-rag
+# LLM for queries (optional)
+ORCHESTRATOR_PROVIDER=anthropic
+ORCHESTRATOR_MODEL=claude-sonnet-4-5-20250929
+ORCHESTRATOR_API_KEY=sk-...
 
-# Generate specific wrapper types
-python generator.py --service code-graph-rag --type bash,python
-
-# Use generated bash script
-cd output/code-graph-rag/scripts
-./query_callers.sh "my.function" 3
-
-# Use generated Python client
-from mcp_clients.code_graph_rag import CodeGraphRagClient
-
-client = CodeGraphRagClient(base_url="http://localhost:8001")
-result = client.query_callers(function_name="my.function", max_depth=3)
+CYPHER_PROVIDER=anthropic
+CYPHER_MODEL=claude-sonnet-4-5-20250929
+CYPHER_API_KEY=sk-...
 ```
 
-Generated wrappers include:
-- **Bash scripts**: One script per tool with formatted output
-- **Python modules**: Type-safe clients with full IntelliSense support
-- **CLI tools**: argparse-based command-line interfaces
-- **Skills**: JSON metadata for skill registries
+Supported providers: `anthropic`, `openai`, `google` (Vertex AI), `ollama`
 
-For complete API documentation, see [HTTP API Reference](docs/HTTP_API.md).
+## Documentation
 
-## 🔌 MCP Server (Claude Code Integration)
+- `docs/VISION.md` - Purpose, philosophy, relationships
+- `docs/ARCHITECTURE.md` - System design, graph schema, tools
+- `CLAUDE.md` - AI assistant guidance
 
-Graph-Code can run as an MCP (Model Context Protocol) server, enabling seamless integration with Claude Code and other MCP clients.
+## Relationship to Other Tools
 
-### Quick Setup
+**seekr** - Semantic code search via vector embeddings
+**docwell** - Documentation search via vector embeddings
+**code-graph-rag** - Structural relationship queries via knowledge graph
+
+Use together for comprehensive codebase understanding.
+
+## Development
 
 ```bash
-claude mcp add --transport stdio graph-code \
-  --env TARGET_REPO_PATH=/absolute/path/to/your/project \
-  --env CYPHER_PROVIDER=openai \
-  --env CYPHER_MODEL=gpt-4 \
-  --env CYPHER_API_KEY=your-api-key \
-  -- uv run --directory /path/to/code-graph-rag graph-code mcp-server
+# Run tests
+uv run pytest
+
+# Lint
+uv run ruff check
+
+# Type check
+uv run mypy codebase_rag
+
+# Format
+uv run ruff format
 ```
 
-### Available Tools
+## License
 
-- **index_repository** - Build knowledge graph
-- **query_code_graph** - Natural language queries
-- **get_code_snippet** - Retrieve code by qualified name
-- **surgical_replace_code** - Precise code edits
-- **read_file / write_file** - File operations
-- **list_directory** - Browse project structure
-
-### Example Usage
-
-```
-> Index this repository
-> What functions call UserService.create_user?
-> Update the login function to add rate limiting
-```
-
-For detailed setup, see [Claude Code Setup Guide](docs/claude-code-setup.md).
-
-## 📊 Graph Schema
-
-The knowledge graph uses the following node types and relationships:
-
-### Node Types
-- **Project**: Root node representing the entire repository
-- **Package**: Language packages (Python: `__init__.py`, etc.)
-- **Module**: Individual source code files (`.py`, `.js`, `.jsx`, `.ts`, `.tsx`, `.rs`, `.go`, `.scala`, `.sc`, `.java`)
-- **Class**: Class/Struct/Enum definitions across all languages
-- **Function**: Module-level functions and standalone functions
-- **Method**: Class methods and associated functions
-- **Folder**: Regular directories
-- **File**: All files (source code and others)
-- **ExternalPackage**: External dependencies
-
-### Language-Specific Mappings
-- **Python**: `function_definition`, `class_definition`
-- **JavaScript/TypeScript**: `function_declaration`, `arrow_function`, `class_declaration`
-- **C++**: `function_definition`, `template_declaration`, `lambda_expression`, `class_specifier`, `struct_specifier`, `union_specifier`, `enum_specifier`
-- **Rust**: `function_item`, `struct_item`, `enum_item`, `impl_item`
-- **Go**: `function_declaration`, `method_declaration`, `type_declaration`
-- **Scala**: `function_definition`, `class_definition`, `object_definition`, `trait_definition`
-- **Java**: `method_declaration`, `class_declaration`, `interface_declaration`, `enum_declaration`
-
-### Relationships
-- `CONTAINS_PACKAGE`: Project or Package contains Package nodes
-- `CONTAINS_FOLDER`: Project, Package, or Folder contains Folder nodes
-- `CONTAINS_FILE`: Project, Package, or Folder contains File nodes
-- `CONTAINS_MODULE`: Project, Package, or Folder contains Module nodes
-- `DEFINES`: Module defines classes/functions
-- `DEFINES_METHOD`: Class defines methods
-- `DEPENDS_ON_EXTERNAL`: Project depends on external packages
-- `CALLS`: Function or Method calls other functions/methods
-
-## 🔧 Configuration
-
-Configuration is managed through environment variables in `.env` file:
-
-### Provider-Specific Settings
-
-#### Orchestrator Model Configuration
-- `ORCHESTRATOR_PROVIDER`: Provider name (`google`, `openai`, `ollama`)
-- `ORCHESTRATOR_MODEL`: Model ID (e.g., `gemini-2.5-pro`, `gpt-4o`, `llama3.2`)
-- `ORCHESTRATOR_API_KEY`: API key for the provider (if required)
-- `ORCHESTRATOR_ENDPOINT`: Custom endpoint URL (if required)
-- `ORCHESTRATOR_PROJECT_ID`: Google Cloud project ID (for Vertex AI)
-- `ORCHESTRATOR_REGION`: Google Cloud region (default: `us-central1`)
-- `ORCHESTRATOR_PROVIDER_TYPE`: Google provider type (`gla` or `vertex`)
-- `ORCHESTRATOR_THINKING_BUDGET`: Thinking budget for reasoning models
-- `ORCHESTRATOR_SERVICE_ACCOUNT_FILE`: Path to service account file (for Vertex AI)
-
-#### Cypher Model Configuration
-- `CYPHER_PROVIDER`: Provider name (`google`, `openai`, `ollama`)
-- `CYPHER_MODEL`: Model ID (e.g., `gemini-2.5-flash`, `gpt-4o-mini`, `codellama`)
-- `CYPHER_API_KEY`: API key for the provider (if required)
-- `CYPHER_ENDPOINT`: Custom endpoint URL (if required)
-- `CYPHER_PROJECT_ID`: Google Cloud project ID (for Vertex AI)
-- `CYPHER_REGION`: Google Cloud region (default: `us-central1`)
-- `CYPHER_PROVIDER_TYPE`: Google provider type (`gla` or `vertex`)
-- `CYPHER_THINKING_BUDGET`: Thinking budget for reasoning models
-- `CYPHER_SERVICE_ACCOUNT_FILE`: Path to service account file (for Vertex AI)
-
-### System Settings
-- `MEMGRAPH_HOST`: Memgraph hostname (default: `localhost`)
-- `MEMGRAPH_PORT`: Memgraph port (default: `7687`)
-- `MEMGRAPH_HTTP_PORT`: Memgraph HTTP port (default: `7444`)
-- `LAB_PORT`: Memgraph Lab port (default: `3000`)
-- `MEMGRAPH_BATCH_SIZE`: Batch size for Memgraph operations (default: `1000`)
-- `TARGET_REPO_PATH`: Default repository path (default: `.`)
-- `LOCAL_MODEL_ENDPOINT`: Fallback endpoint for Ollama (default: `http://localhost:11434/v1`)
-
-### Key Dependencies
-- **tree-sitter**: Core Tree-sitter library for language-agnostic parsing
-- **tree-sitter-{language}**: Language-specific grammars (Python, JS, TS, Rust, Go, Scala, Java)
-- **pydantic-ai**: AI agent framework for RAG orchestration
-- **pymgclient**: Memgraph Python client for graph database operations
-- **loguru**: Advanced logging with structured output
-- **python-dotenv**: Environment variable management
-
-## 🤖 Agentic Workflow & Tools
-
-The agent is designed with a deliberate workflow to ensure it acts with context and precision, especially when modifying the file system.
-
-### Core Tools
-
-The agent has access to a suite of tools to understand and interact with the codebase:
-
-- **`query_codebase_knowledge_graph`**: The primary tool for understanding the repository. It queries the graph database to find files, functions, classes, and their relationships based on natural language.
-- **`get_code_snippet`**: Retrieves the exact source code for a specific function or class.
-- **`read_file_content`**: Reads the entire content of a specified file.
-- **`create_new_file`**: Creates a new file with specified content.
-- **`replace_code_surgically`**: Surgically replaces specific code blocks in files. Requires exact target code and replacement. Only modifies the specified block, leaving rest of file unchanged. True surgical patching.
-- **`execute_shell_command`**: Executes a shell command in the project's environment.
-
-### Intelligent and Safe File Editing
-
-The agent uses AST-based function targeting with Tree-sitter for precise code modifications. Features include:
-- **Visual diff preview** before changes
-- **Surgical patching** that only modifies target code blocks
-- **Multi-language support** across all supported languages
-- **Security sandbox** preventing edits outside project directory
-- **Smart function matching** with qualified names and line numbers
-
-
-
-## 🌍 Multi-Language Support
-
-### Language-Specific Features
-
-- **Python**: Full support including nested functions, methods, classes, decorators, type hints, and package structure
-- **JavaScript**: ES6 modules, CommonJS modules, prototype-based methods, object methods, arrow functions, classes, and JSX support
-- **TypeScript**: All JavaScript features plus interfaces, type aliases, enums, namespaces, generics, and advanced type inference
-- **C++**: Comprehensive support including functions, classes, structs, unions, enums, constructors, destructors, operator overloading, templates, lambdas, namespaces, C++20 modules, inheritance, method calls, and modern C++ features
-- **Lua**: Functions, local/global variables, tables, metatables, closures, coroutines, and object-oriented patterns
-- **Rust**: Functions, structs, enums, impl blocks, traits, and associated functions
-- **Go**: Functions, methods, type declarations, interfaces, and struct definitions
-- **Scala**: Functions, methods, classes, objects, traits, case classes, implicits, and Scala 3 syntax
-- **Java**: Methods, constructors, classes, interfaces, enums, annotations, generics, modern features (records, sealed classes, switch expressions), concurrency patterns, reflection, and enterprise frameworks
-
-
-### Adding New Languages
-
-Graph-Code makes it easy to add support for any language that has a Tree-sitter grammar. The system automatically handles grammar compilation and integration.
-
-> **⚠️ Recommendation**: While you can add languages yourself, we recommend waiting for official full support to ensure optimal parsing quality, comprehensive feature coverage, and robust integration. The languages marked as "In Development" above will receive dedicated optimization and testing.
-
-> **💡 Request Support**: If you want a specific language to be officially supported, please [submit an issue](https://github.com/vitali87/code-graph-rag/issues) with your language request.
-
-#### Quick Start: Add a Language
-
-Use the built-in language management tool to add any Tree-sitter supported language:
-
-```bash
-# Add a language using the standard tree-sitter repository
-python -m codebase_rag.tools.language add-grammar <language-name>
-
-# Examples:
-python -m codebase_rag.tools.language add-grammar c-sharp
-python -m codebase_rag.tools.language add-grammar php
-python -m codebase_rag.tools.language add-grammar ruby
-python -m codebase_rag.tools.language add-grammar kotlin
-```
-
-#### Custom Grammar Repositories
-
-For languages hosted outside the standard tree-sitter organization:
-
-```bash
-# Add a language from a custom repository
-python -m codebase_rag.tools.language add-grammar --grammar-url https://github.com/custom/tree-sitter-mylang
-```
-
-#### What Happens Automatically
-
-When you add a language, the tool automatically:
-
-1. **Downloads the Grammar**: Clones the tree-sitter grammar repository as a git submodule
-2. **Detects Configuration**: Auto-extracts language metadata from `tree-sitter.json`
-3. **Analyzes Node Types**: Automatically identifies AST node types for:
-   - Functions/methods (`method_declaration`, `function_definition`, etc.)
-   - Classes/structs (`class_declaration`, `struct_declaration`, etc.)
-   - Modules/files (`compilation_unit`, `source_file`, etc.)
-   - Function calls (`call_expression`, `method_invocation`, etc.)
-4. **Compiles Bindings**: Builds Python bindings from the grammar source
-5. **Updates Configuration**: Adds the language to `codebase_rag/language_config.py`
-6. **Enables Parsing**: Makes the language immediately available for codebase analysis
-
-#### Example: Adding C# Support
-
-```bash
-$ python -m codebase_rag.tools.language add-grammar c-sharp
-🔍 Using default tree-sitter URL: https://github.com/tree-sitter/tree-sitter-c-sharp
-🔄 Adding submodule from https://github.com/tree-sitter/tree-sitter-c-sharp...
-✅ Successfully added submodule at grammars/tree-sitter-c-sharp
-Auto-detected language: c-sharp
-Auto-detected file extensions: ['cs']
-Auto-detected node types:
-Functions: ['destructor_declaration', 'method_declaration', 'constructor_declaration']
-Classes: ['struct_declaration', 'enum_declaration', 'interface_declaration', 'class_declaration']
-Modules: ['compilation_unit', 'file_scoped_namespace_declaration', 'namespace_declaration']
-Calls: ['invocation_expression']
-
-✅ Language 'c-sharp' has been added to the configuration!
-📝 Updated codebase_rag/language_config.py
-```
-
-#### Managing Languages
-
-```bash
-# List all configured languages
-python -m codebase_rag.tools.language list-languages
-
-# Remove a language (this also removes the git submodule unless --keep-submodule is specified)
-python -m codebase_rag.tools.language remove-language <language-name>
-```
-
-#### Language Configuration
-
-The system uses a configuration-driven approach for language support. Each language is defined in `codebase_rag/language_config.py` with the following structure:
-
-```python
-"language-name": LanguageConfig(
-    name="language-name",
-    file_extensions=[".ext1", ".ext2"],
-    function_node_types=["function_declaration", "method_declaration"],
-    class_node_types=["class_declaration", "struct_declaration"],
-    module_node_types=["compilation_unit", "source_file"],
-    call_node_types=["call_expression", "method_invocation"],
-),
-```
-
-#### Troubleshooting
-
-**Grammar not found**: If the automatic URL doesn't work, use a custom URL:
-```bash
-python -m codebase_rag.tools.language add-grammar --grammar-url https://github.com/custom/tree-sitter-mylang
-```
-
-**Version incompatibility**: If you get "Incompatible Language version" errors, update your tree-sitter package:
-```bash
-uv add tree-sitter@latest
-```
-
-**Missing node types**: The tool automatically detects common node patterns, but you can manually adjust the configuration in `language_config.py` if needed.
-
-## 📦 Building a binary
-
-You can build a binary of the application using the `build_binary.py` script. This script uses PyInstaller to package the application and its dependencies into a single executable.
-
-```bash
-python build_binary.py
-```
-The resulting binary will be located in the `dist` directory.
-
-## 🐛 Debugging
-
-1. **Check Memgraph connection**:
-   - Ensure Docker containers are running: `docker-compose ps`
-   - Verify Memgraph is accessible on port 7687
-
-2. **View database in Memgraph Lab**:
-   - Open http://localhost:3000
-   - Connect to memgraph:7687
-
-3. **For local models**:
-   - Verify Ollama is running: `ollama list`
-   - Check if models are downloaded: `ollama pull llama3`
-   - Test Ollama API: `curl http://localhost:11434/v1/models`
-   - Check Ollama logs: `ollama logs`
-
-## 🤝 Contributing
-
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
-
-Good first PRs are from TODO issues.
-
-## 🙋‍♂️ Support
-
-For issues or questions:
-1. Check the logs for error details
-2. Verify Memgraph connection
-3. Ensure all environment variables are set
-4. Review the graph schema matches your expectations
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=vitali87/code-graph-rag&type=Date)](https://www.star-history.com/#vitali87/code-graph-rag&Date)
+MIT

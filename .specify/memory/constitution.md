@@ -1,140 +1,312 @@
-<!--
-SYNC IMPACT REPORT
-==================
-Version Change: 0.0.0 → 1.0.0 (MAJOR - initial constitution)
-Modified Principles: N/A (new constitution)
-Added Sections:
-  - Core Principles (5 principles)
-  - Technical Standards
-  - Development Workflow
-  - Governance
-Removed Sections: N/A
-Template Status:
-  - .specify/templates/plan-template.md: ✅ Compatible (Constitution Check section exists)
-  - .specify/templates/spec-template.md: ✅ Compatible (requirements-focused)
-  - .specify/templates/tasks-template.md: ✅ Compatible (phase-based structure)
-Follow-up TODOs: None
--->
-
-# Code-Graph-RAG Constitution
+# Project Constitution
 
 ## Core Principles
 
-### I. Graph-First Intelligence
+### 1. Precision Over Approximation
+- Tree-sitter provides exact AST parsing, not heuristics
+- Memgraph stores precise relationships, not fuzzy matches
+- Query results must be 100% accurate based on actual code structure
+- Type inference improves precision but never sacrifices correctness
 
-The knowledge graph is the authoritative source of codebase understanding. All code analysis, querying, and AI-assisted operations MUST flow through the graph database.
+### 2. Language Agnostic Foundation
+- Unified graph schema works across all languages
+- Tree-sitter grammars enable consistent parsing patterns
+- Same query tools work for Python, TypeScript, Rust, etc.
+- Language-specific processors handle unique features without breaking abstraction
 
-- Every codebase insight MUST be derivable from graph queries
-- Natural language queries translate to Cypher; results come from graph, not heuristics
-- Graph schema defines what the system "knows" about code
-- New language support MUST update the graph schema, not bypass it
+### 3. Structural Focus, Not Semantic Search
+- We answer "who calls this" not "find similar code"
+- We map "what inherits from X" not "discover related patterns"
+- We trace "what depends on Y" not "search for imports"
+- Complementary to seekr (semantic) and docwell (docs), not competitive
 
-**Rationale**: Graphs capture relationships (calls, contains, defines) that flat text search cannot. Consistent graph access ensures reproducible, explainable results.
+### 4. Multiple Indexing Targets
+- Index working project for active development queries
+- Index external GitHub repos for research and comparison
+- Support cross-project graph queries
+- Enable architectural pattern analysis across codebases
 
-### II. Multi-Language Universality
+### 5. MCP-First Integration
+- Native MCP server is primary interface
+- HTTP API for external integrations (secondary)
+- CLI for interactive exploration and debugging
+- All interfaces share same tool registry
 
-All supported programming languages receive equal treatment through a unified graph schema. No language receives special handling that breaks schema consistency.
+## Quality Standards
 
-- Unified node types: Project, Module, Class, Function, Method across ALL languages
-- Unified relationships: CONTAINS, DEFINES, CALLS, DEPENDS_ON apply universally
-- Language-specific features (decorators, generics, traits) map to common patterns
-- Adding a language MUST NOT require schema changes; only parser configuration
+### Code Quality
 
-**Rationale**: AI tools querying the graph should not need language-specific logic. A query for "functions that call X" works identically for Python, Rust, or TypeScript.
+**Type Safety:**
+- All Python code must include type hints
+- Use strict mypy configuration
+- Pydantic models for all data structures
+- No `Any` types without justification
 
-### III. AI-Native Interface
+**Testing:**
+- Unit tests for parsers (per language)
+- Integration tests for end-to-end indexing
+- Stress tests for large codebases (>100k LOC)
+- Query accuracy validation against known codebases
 
-The MCP (Model Context Protocol) server is the primary interface for AI tools to access codebase intelligence. Design decisions prioritize AI consumption patterns.
+**Performance:**
+- Index 100k LOC projects in <60 seconds
+- Batch insertions (1000 nodes/tx minimum)
+- Parallel file processing via asyncio
+- Query response time <2 seconds for common patterns
 
-- MCP tools MUST be the first-class way AI accesses the graph
-- Tool responses MUST be structured for LLM consumption (concise, actionable)
-- Natural language → Cypher translation is core functionality, not an add-on
-- Semantic search (embeddings) supplements structural graph queries
+### CLI Quality
 
-**Rationale**: This project exists to give AI systems deep codebase understanding. Every feature must answer: "How does this help an AI work with code?"
+**Output Formatting:**
+- Rich formatting for interactive CLI
+- JSON for programmatic consumption
+- Markdown for documentation
+- Tables for relationship queries
 
-### IV. Parse Precision
+**Error Handling:**
+- Clear error messages with actionable guidance
+- Graceful degradation when parser fails
+- Connection retry logic for Memgraph
+- Timeout handling for LLM queries
 
-Tree-sitter AST parsing is the only acceptable method for code analysis. No regex-based parsing, no heuristic guessing.
+**User Experience:**
+- Natural language queries feel intuitive
+- Progress indicators for long operations
+- Confirmation prompts for destructive actions
+- Session logging for debugging
 
-- All code extraction MUST use Tree-sitter grammars
-- Function boundaries, class definitions, call sites come from AST nodes only
-- Adding language support requires a Tree-sitter grammar; no exceptions
-- Code snippets retrieved MUST match exact AST node boundaries
+### Documentation Quality
 
-**Rationale**: Regex and heuristics produce false positives/negatives. AST parsing guarantees structural correctness. AI tools need reliable data.
+**CLAUDE.md:**
+- Under 200 lines (progressive discovery)
+- Critical behavioral rules only
+- Pointers to VISION.md and ARCHITECTURE.md
+- No duplication with other docs
 
-### V. Safe Code Operations
+**VISION.md:**
+- Clear problem statement
+- Design philosophy with rationale
+- Relationship to broader infrastructure
+- Success criteria and non-goals
 
-Code modifications require explicit confirmation and preserve the ability to recover. The system defaults to read-only operations.
+**ARCHITECTURE.md:**
+- System overview with diagrams
+- Component descriptions
+- Graph schema documentation
+- Extension points clearly marked
 
-- All file writes MUST show diffs before execution
-- Surgical code replacement targets specific AST nodes, not line ranges
-- Original code MUST be recoverable (via git, backups, or undo)
-- Batch modifications MUST be individually reviewable
-- MCP edit tools MUST respect project directory boundaries
-
-**Rationale**: AI-assisted code changes can cascade unexpectedly. Explicit confirmation and recovery paths prevent irreversible damage.
-
-## Technical Standards
-
-### Database Requirements
-
-- Memgraph is the required graph database (Cypher-compatible, in-memory performance)
-- Each project gets its own database: `codegraph_<project-name>`
-- Group-level databases (`codegraph_<group>`) aggregate related projects
-- Graph updates MUST be atomic per-file to prevent partial states
-
-### Embedding Requirements
-
-- Semantic search uses code-specialized embeddings (nomic-embed-code or equivalent)
-- Embeddings are stored alongside graph nodes, not in separate systems
-- Vector similarity thresholds MUST be tunable per-query
-
-### Configuration Standards
-
-- Provider configuration (Ollama, OpenAI, Google) uses explicit environment variables
-- No hardcoded API endpoints or model names in source code
-- Mixed provider configurations (different models for orchestrator vs cypher) MUST be supported
+**README.md:**
+- Quick start in <5 steps
+- Key capabilities with examples
+- Multiple interface usage patterns
+- Clear relationship to complementary tools
 
 ## Development Workflow
 
+### Adding Features
+
+1. **Define the problem:** What structural question does this answer?
+2. **Design the query:** What Cypher pattern captures this?
+3. **Create the tool:** Implement with pydantic-ai signature
+4. **Add to registry:** Register in MCPToolsRegistry
+5. **Test thoroughly:** Unit, integration, accuracy validation
+6. **Document in ARCHITECTURE.md:** Add to tool catalog
+
+### Adding Language Support
+
+1. **Add Tree-sitter grammar:** Place in `grammars/`
+2. **Create language processor:** Implement in `parsers/`
+3. **Extract definitions:** Functions, classes, methods
+4. **Extract calls:** Function/method invocations
+5. **Extract imports:** Module dependencies
+6. **Add type inference:** Language-specific resolution (if applicable)
+7. **Test with real codebases:** Validate accuracy
+8. **Register in language_config.py:** Enable in factory
+
 ### Testing Requirements
 
-- Parser changes require test coverage for affected language
-- MCP tool changes require integration tests with sample queries
-- Graph schema changes require migration scripts and backward compatibility tests
+**Before Merging:**
+- All tests pass (`uv run pytest`)
+- Type checks pass (`uv run mypy codebase_rag`)
+- Linter passes (`uv run ruff check`)
+- No performance regressions (stress tests)
 
-### Code Change Protocol
+**For New Languages:**
+- Parse sample codebases (1k+ LOC)
+- Validate definition extraction accuracy
+- Validate call graph accuracy
+- Validate import resolution accuracy
 
-- New language support follows the documented `add-grammar` workflow
-- Infrastructure changes (init scripts, hooks) require testing on sample projects
-- Breaking changes to MCP tools require version bumps and changelog entries
+**For New Tools:**
+- Unit tests with mocked graph
+- Integration tests with real graph
+- Accuracy validation against known queries
+- Documentation with usage examples
 
-### Documentation Updates
+## Integration Contracts
 
-- README.md reflects user-facing features and setup
-- CLAUDE.md provides AI-agent guidance for working with the codebase
-- docs/INFRASTRUCTURE.md covers deployment and project initialization
+### MCP Server Contract
+
+**Tools must:**
+- Follow pydantic-ai Tool signature
+- Return structured results (dict/list)
+- Include clear descriptions
+- Define JSON schemas for inputs
+
+**Server must:**
+- Expose all registered tools
+- Handle async tool execution
+- Provide error context in responses
+- Log tool invocations
+
+### HTTP Server Contract
+
+**Endpoints must:**
+- Accept `POST /api/tools/{tool_name}`
+- Expect `{"params": {...}}` body
+- Return `{"result": {...}, "status": "success|error"}`
+- Include appropriate HTTP status codes
+
+**Server must:**
+- CORS-enabled for web integrations
+- Health check endpoint (`/health`)
+- Request/response logging
+- Error responses with details
+
+### CLI Contract
+
+**Commands must:**
+- Use Typer for argument parsing
+- Provide `--help` documentation
+- Rich formatting for output
+- Return appropriate exit codes
+
+**Interface must:**
+- Interactive mode for `chat` command
+- Non-interactive mode for scripting
+- Progress indicators for long operations
+- Session logging for debugging
+
+## Performance Constraints
+
+### Indexing Performance
+
+**Targets:**
+- 10k LOC: <10 seconds
+- 100k LOC: <60 seconds
+- 1M LOC: <10 minutes
+
+**Optimization strategies:**
+- Parallel file processing (asyncio)
+- Batch graph insertions (1000+/tx)
+- Incremental updates (planned)
+- Parser result caching
+
+### Query Performance
+
+**Targets:**
+- Simple queries (callers, hierarchy): <1 second
+- Complex queries (call graphs, patterns): <5 seconds
+- Natural language queries: <10 seconds (includes LLM)
+
+**Optimization strategies:**
+- Indexed node properties (qualified_name)
+- Cypher query optimization
+- Result limiting for large graphs
+- Query result caching (planned)
+
+### Resource Usage
+
+**Memory:**
+- Parser memory cleanup after each file
+- Streaming file processing
+- Configurable batch sizes
+- Graph connection pooling
+
+**CPU:**
+- Async I/O for file operations
+- Parallel parsing where possible
+- Efficient Tree-sitter node traversal
+- Lazy loading of parsers
 
 ## Governance
 
-This constitution supersedes all other development practices for code-graph-rag.
+### Decision Making
 
-**Amendment Process**:
-1. Propose changes via PR with rationale
-2. Changes affecting Core Principles require explicit approval
-3. Document migration path for any principle modifications
-4. Update dependent templates when principles change
+**Tool design decisions:**
+- Must solve real structural query needs
+- Must not duplicate existing tools (seekr, docwell)
+- Must work across multiple languages
+- Must be testable and maintainable
 
-**Versioning**:
-- MAJOR: Principle removals, fundamental changes to graph schema
-- MINOR: New principles, expanded guidance, new technical standards
-- PATCH: Clarifications, typo fixes, non-behavioral changes
+**Language support decisions:**
+- Must have Tree-sitter grammar available
+- Must represent significant user demand
+- Must be maintainable with available resources
+- Must provide value beyond text search
 
-**Compliance**:
-- All PRs MUST verify alignment with Core Principles
-- Complexity that violates principles requires documented justification
-- The CLAUDE.md file serves as runtime guidance for AI agents
+**Architecture decisions:**
+- Document in ARCHITECTURE.md with rationale
+- Consider performance implications
+- Maintain backwards compatibility where possible
+- Prefer simplicity over premature optimization
 
-**Version**: 1.0.0 | **Ratified**: 2025-12-06 | **Last Amended**: 2025-12-06
+### Conflict Resolution
+
+**When tools overlap:**
+- Prefer pre-built tools (query_callers) over general query tool
+- Document which tool to use when in descriptions
+- Deprecate redundant tools gradually
+
+**When languages conflict:**
+- Language-specific processors handle unique features
+- Factory pattern isolates language differences
+- Unified graph schema maintained across all languages
+
+**When performance conflicts with accuracy:**
+- Accuracy always wins
+- Optimize without sacrificing correctness
+- Document performance trade-offs
+- Provide configuration for tuning
+
+## Evolution Guidelines
+
+### Breaking Changes
+
+**Avoid breaking:**
+- MCP tool schemas (versioning instead)
+- Graph schema (migrations instead)
+- CLI command signatures (deprecation warnings)
+
+**When unavoidable:**
+- Version bump (semver)
+- Migration guide in docs
+- Deprecation period (2+ releases)
+- Clear changelog entry
+
+### Feature Additions
+
+**Prioritize:**
+- Common structural query patterns
+- Language support for popular languages
+- Performance optimizations
+- Developer experience improvements
+
+**Defer:**
+- Semantic search features (use seekr)
+- Documentation search (use docwell)
+- Code modification (use file editor tools)
+- Static analysis (use ruff, mypy, etc.)
+
+### Technical Debt
+
+**Pay down:**
+- Incremental indexing (planned)
+- Query result caching (planned)
+- Parser error recovery
+- Performance profiling
+
+**Accept:**
+- Perfect type inference (impossible for dynamic languages)
+- 100% language coverage (Tree-sitter limitations)
+- Real-time updates (file watching overhead)
+- Distributed graph (single Memgraph sufficient)

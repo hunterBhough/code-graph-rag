@@ -1,6 +1,6 @@
-"""MCP server implementation for code-graph-rag.
+"""MCP server implementation for weavr.
 
-This module provides the main MCP server that exposes code-graph-rag's
+This module provides the main MCP server that exposes weavr's
 capabilities via the Model Context Protocol.
 """
 
@@ -14,10 +14,10 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool
 
-from codebase_rag.config import settings
-from codebase_rag.mcp.tools import create_mcp_tools_registry
-from codebase_rag.services.graph_service import MemgraphIngestor
-from codebase_rag.services.llm import CypherGenerator
+from weavr.config import settings
+from weavr.mcp.tools import create_mcp_tools_registry
+from weavr.services.graph_service import MemgraphIngestor
+from weavr.services.llm import CypherGenerator
 
 
 def setup_logging() -> None:
@@ -119,7 +119,7 @@ def create_server() -> tuple[Server, MemgraphIngestor]:
     logger.info("[GraphCode MCP] Services initialized successfully")
 
     # Create MCP server
-    server = Server("graph-code")
+    server = Server("weavr")
 
     @server.list_tools()
     async def list_tools() -> list[Tool]:

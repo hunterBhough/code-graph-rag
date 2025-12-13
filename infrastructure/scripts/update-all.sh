@@ -114,5 +114,5 @@ fi
 
 echo ""
 echo "View detailed logs:"
-echo "  tail -f /Users/hunter/code/ai_agency/vendor/code-graph-rag/logs/*-updates.log"
+echo "  tail -f /Users/hunter/code/ai_agency/vendor/weavr/logs/*-updates.log"
 echo ""

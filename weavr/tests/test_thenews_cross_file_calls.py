@@ -8,8 +8,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from codebase_rag.graph_updater import GraphUpdater
-from codebase_rag.parser_loader import load_parsers
+from weavr.graph_updater import GraphUpdater
+from weavr.parser_loader import load_parsers
 
 
 def test_thenews_cross_file_method_calls_with_singleton_pattern(

@@ -12,10 +12,10 @@ import argparse
 import sys
 from pathlib import Path
 
-# Add the parent directory to Python path so we can import codebase_rag
+# Add the parent directory to Python path so we can import weavr
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from codebase_rag.graph_loader import GraphLoader, load_graph
+from weavr.graph_loader import GraphLoader, load_graph
 
 
 def print_summary(summary: dict) -> None:
@@ -80,9 +80,9 @@ def main() -> None:
         description="Analyze an exported codebase graph.",
         epilog="""
 To create an exported graph file, run:
-  python -m codebase_rag.main start --repo-path /path/to/repo --update-graph -o graph.json
+  python -m weavr.main start --repo-path /path/to/repo --update-graph -o graph.json
 Or to export an existing graph:
-  python -m codebase_rag.main export -o graph.json
+  python -m weavr.main export -o graph.json
 """,
         formatter_class=argparse.RawTextHelpFormatter,
     )

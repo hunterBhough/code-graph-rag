@@ -1,7 +1,7 @@
-"""MCP server module for code-graph-rag.
+"""MCP server module for weavr.
 
 This module provides a Model Context Protocol (MCP) server implementation
-that exposes code-graph-rag's capabilities to MCP clients like Claude Code.
+that exposes weavr's capabilities to MCP clients like Claude Code.
 """
 
-from codebase_rag.mcp.server import main as main
+from weavr.mcp.server import main as main

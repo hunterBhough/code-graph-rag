@@ -2,7 +2,7 @@
 
 ## System Overview
 
-code-graph-rag is a multi-layer system that parses code, builds knowledge graphs, and exposes query tools via multiple interfaces.
+weavr is a multi-layer system that parses code, builds knowledge graphs, and exposes query tools via multiple interfaces.
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -41,19 +41,19 @@ code-graph-rag is a multi-layer system that parses code, builds knowledge graphs
 
 ### 1. Interface Layer
 
-**MCP Server** (`codebase_rag/mcp/`)
+**MCP Server** (`weavr/mcp/`)
 - Implements Model Context Protocol
 - Exposes tools to Claude Desktop
 - Async event-driven architecture
 - Tool registry shared with other interfaces
 
-**HTTP Server** (`codebase_rag/http/`)
+**HTTP Server** (`weavr/http/`)
 - FastAPI-based REST API
 - Health checks and monitoring
 - Same tools as MCP, different transport
 - CORS-enabled for web integrations
 
-**CLI** (`codebase_rag/main.py`)
+**CLI** (`weavr/main.py`)
 - Typer-based command interface
 - Interactive chat mode
 - Repository indexing commands
@@ -61,7 +61,7 @@ code-graph-rag is a multi-layer system that parses code, builds knowledge graphs
 
 ### 2. Tool Registry
 
-**MCPToolsRegistry** (`codebase_rag/mcp/tools.py`)
+**MCPToolsRegistry** (`weavr/mcp/tools.py`)
 - Single source of truth for all tools
 - Shared across MCP, HTTP, CLI
 - Metadata includes schemas and handlers
@@ -89,7 +89,7 @@ code-graph-rag is a multi-layer system that parses code, builds knowledge graphs
 
 ### 3. Parser Layer
 
-**Tree-sitter Integration** (`codebase_rag/parsers/`)
+**Tree-sitter Integration** (`weavr/parsers/`)
 - Language-agnostic AST parsing
 - Factory pattern for parser creation
 - Per-language processors handle language-specific patterns
@@ -123,13 +123,13 @@ code-graph-rag is a multi-layer system that parses code, builds knowledge graphs
 
 ### 4. Service Layer
 
-**MemgraphIngestor** (`codebase_rag/services/graph_service.py`)
+**MemgraphIngestor** (`weavr/services/graph_service.py`)
 - Manages Memgraph connection
 - Batch inserts for performance
 - Transaction management
 - Query execution
 
-**CypherGenerator** (`codebase_rag/services/llm.py`)
+**CypherGenerator** (`weavr/services/llm.py`)
 - Natural language → Cypher translation
 - Uses pydantic-ai with configurable LLM
 - Schema-aware query generation
@@ -370,15 +370,15 @@ Response: {"result": {...}, "status": "success"}
 ### CLI Commands
 
 ```bash
-graph-code index [--repo URL]     # Index repository
-graph-code chat [query]           # Interactive or direct query
-graph-code mcp                    # Start MCP server
-graph-code http                   # Start HTTP server
+weavr index [--repo URL]     # Index repository
+weavr chat [query]           # Interactive or direct query
+weavr mcp                    # Start MCP server
+weavr http                   # Start HTTP server
 ```
 
 ## Testing Strategy
 
-**Unit Tests** (`codebase_rag/tests/`)
+**Unit Tests** (`weavr/tests/`)
 - Parser tests (per language)
 - Tool tests (mocked graph)
 - Service tests (integration)
@@ -398,8 +398,8 @@ graph-code http                   # Start HTTP server
 **Development:**
 ```bash
 docker compose up -d              # Start Memgraph
-uv run graph-code index           # Index project
-uv run graph-code mcp             # Run MCP server
+uv run weavr index                # Index project
+uv run weavr mcp                  # Run MCP server
 ```
 
 **Production:**
@@ -414,10 +414,10 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 ```json
 {
   "mcpServers": {
-    "code-graph-rag": {
+    "weavr": {
       "command": "uv",
-      "args": ["run", "graph-code", "mcp"],
-      "cwd": "/path/to/code-graph-rag"
+      "args": ["run", "weavr", "mcp"],
+      "cwd": "/path/to/weavr"
     }
   }
 }

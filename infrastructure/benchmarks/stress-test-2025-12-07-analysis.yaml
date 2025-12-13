@@ -5,7 +5,7 @@
 metadata:
   date: "2025-12-07"
   time: "23:20:33"
-  codebase: "code-graph-rag"
+  codebase: "weavr"
   memgraph_version: "latest"
   ollama_model: "qwen2.5-coder:32b"
   indexed_files: 0  # Graph not populated during test
@@ -76,13 +76,13 @@ components:
     root_cause_analysis:
       primary_issue: "MemgraphIngestor initialized but connection not established"
       likely_causes:
-        - "Database not selected (USE DATABASE codegraph_code-graph-rag)"
+        - "Database not selected (USE DATABASE codegraph_weavr)"
         - "Graph not indexed prior to test execution"
         - "Connection pool not initialized in test setup"
 
     remediation:
       immediate:
-        - "Run full indexing before stress test: python -m codebase_rag.main start --repo-path ."
+        - "Run full indexing before stress test: python -m weavr.main start --repo-path ."
         - "Ensure database is created and selected"
         - "Add connection health check to test setup"
 
@@ -246,8 +246,8 @@ recommendations:
   immediate_actions:
     priority: "CRITICAL"
 
-    - action: "Index the code-graph-rag codebase"
-      command: "python -m codebase_rag.main start --repo-path ."
+    - action: "Index the weavr codebase"
+      command: "python -m weavr.main start --repo-path ."
       reason: "Required for meaningful stress test results"
       effort: "5-10 minutes"
 
@@ -255,7 +255,7 @@ recommendations:
       command: |
         docker exec -it codebase-intelligence-memgraph mgconsole
         SHOW DATABASES;
-        USE DATABASE codegraph_code-graph-rag;
+        USE DATABASE codegraph_weavr;
         MATCH (n) RETURN count(n);
       reason: "Confirm graph is populated and accessible"
       effort: "2 minutes"
@@ -282,7 +282,7 @@ recommendations:
     timeline: "This week"
 
     - improvement: "Automatic database selection"
-      location: "codebase_rag/services/graph_service.py::MemgraphIngestor"
+      location: "weavr/services/graph_service.py::MemgraphIngestor"
       change: |
         def __init__(self, ...):
             ...
@@ -298,13 +298,13 @@ recommendations:
       benefit: "Tests can run without full indexing"
 
     - improvement: "Enhanced error messages"
-      location: "codebase_rag/tools/codebase_query.py"
+      location: "weavr/tools/codebase_query.py"
       change: |
         except Exception as e:
             if "Not connected" in str(e):
                 return {
                     "error": "Graph database not connected. Run indexing first.",
-                    "hint": "python -m codebase_rag.main start --repo-path ."
+                    "hint": "python -m weavr.main start --repo-path ."
                 }
       benefit: "Better developer experience"
 
@@ -430,8 +430,8 @@ next_steps:
 
   step_1:
     action: "Index the codebase"
-    command: "python -m codebase_rag.main start --repo-path ."
-    expected_outcome: "codegraph_code-graph-rag database populated with ~50-100 files, 500-1000 nodes"
+    command: "python -m weavr.main start --repo-path ."
+    expected_outcome: "codegraph_weavr database populated with ~50-100 files, 500-1000 nodes"
     estimated_time: "5-10 minutes"
 
   step_2:
@@ -467,7 +467,7 @@ conclusion:
   overall_assessment: "PROMISING with critical blocker"
 
   summary: |
-    The code-graph-rag system shows EXCELLENT LLM integration and Cypher
+    The weavr system shows EXCELLENT LLM integration and Cypher
     generation capabilities. The qwen2.5-coder:32b model via Ollama produces
     high-quality graph queries with 95%+ accuracy, fast response times
     (2.4-4.5s avg), and robust error handling.
@@ -488,7 +488,7 @@ conclusion:
     end_to_end_system: "NOT READY - Graph not populated"
 
   recommendation: |
-    1. Run full indexing: python -m codebase_rag.main start --repo-path .
+    1. Run full indexing: python -m weavr.main start --repo-path .
     2. Re-run stress test
     3. If pass rate > 85%, proceed to integration testing
     4. If issues remain, debug Memgraph connection initialization

@@ -1,4 +1,4 @@
-# code-graph-rag
+# weavr
 
 MCP server for structured code graph queries using Tree-sitter and Memgraph.
 
@@ -11,7 +11,7 @@ MCP server for structured code graph queries using Tree-sitter and Memgraph.
 - ALWAYS use fd/rg/eza (NOT find/grep/ls)
 
 **This Project:**
-Indexes codebases into Memgraph knowledge graph for structural queries (class hierarchies, call graphs, dependencies, callers). Complements seekr (semantic search) and docwell (document search). Can index working project or external GitHub repos for comparison research.
+Indexes codebases into Memgraph knowledge graph for structural queries (class hierarchies, call graphs, dependencies, callers). Complements seekr (semantic search) and docwell (document search). Can index working project or external GitHub repos for comparison research. Weavr weaves connections between code structures through precise structural analysis.
 
 **For details, search:**
 - Architecture → `docs/ARCHITECTURE.md`
@@ -21,10 +21,10 @@ Indexes codebases into Memgraph knowledge graph for structural queries (class hi
 
 ### Development
 ```bash
-uv run graph-code index          # Index current project
-uv run graph-code chat           # Interactive query CLI
-uv run graph-code mcp            # Start MCP server
-uv run graph-code http           # Start HTTP server
+uv run weavr index          # Index current project
+uv run weavr chat           # Interactive query CLI
+uv run weavr mcp            # Start MCP server
+uv run weavr http           # Start HTTP server
 ```
 
 ### Database
@@ -37,31 +37,31 @@ docker compose down              # Stop Memgraph
 ```bash
 uv run pytest                    # Run tests
 uv run ruff check                # Lint code
-uv run mypy codebase_rag         # Type check
+uv run mypy weavr                # Type check
 ```
 
 ## Common Workflows
 
 ### Indexing a Project
 1. Start Memgraph: `docker compose up -d`
-2. Index codebase: `uv run graph-code index`
-3. Query interactively: `uv run graph-code chat`
+2. Index codebase: `uv run weavr index`
+3. Query interactively: `uv run weavr chat`
 
 ### Using as MCP Server
-1. Start server: `uv run graph-code mcp`
+1. Start server: `uv run weavr mcp`
 2. Configure in Claude Desktop MCP settings
 3. Use tools: `index_repository`, `query_code_graph`, `query_callers`, etc.
 
 ### Querying Code Structure
 ```bash
 # Find who calls a function
-uv run graph-code chat "Who calls UserService.create_user?"
+uv run weavr chat "Who calls UserService.create_user?"
 
 # Get class hierarchy
-uv run graph-code chat "Show inheritance tree for BaseModel"
+uv run weavr chat "Show inheritance tree for BaseModel"
 
 # Find dependencies
-uv run graph-code chat "What modules does auth.py depend on?"
+uv run weavr chat "What modules does auth.py depend on?"
 ```
 
 ## Code Conventions
@@ -70,12 +70,12 @@ uv run graph-code chat "What modules does auth.py depend on?"
 - Tree-sitter for all language parsing
 - Pydantic for data validation
 - Async/await for I/O operations
-- Tests colocated in `codebase_rag/tests/`
+- Tests colocated in `weavr/tests/`
 
 ## File Organization
 
 ```
-codebase_rag/
+weavr/
 ├── main.py              # CLI entry point
 ├── mcp/                 # MCP server & tools
 ├── http/                # HTTP server

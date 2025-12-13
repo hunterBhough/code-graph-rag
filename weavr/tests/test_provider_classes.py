@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from codebase_rag.providers.base import (
+from weavr.providers.base import (
     GoogleProvider,
     ModelProvider,
     OllamaProvider,
@@ -223,8 +223,8 @@ class TestOllamaProvider:
 class TestModelCreation:
     """Test model creation through providers."""
 
-    @patch("codebase_rag.providers.base.GoogleGLAProvider")
-    @patch("codebase_rag.providers.base.GeminiModel")
+    @patch("weavr.providers.base.GoogleGLAProvider")
+    @patch("weavr.providers.base.GeminiModel")
     def test_google_model_creation_without_thinking_budget(
         self, mock_gemini_model: Any, mock_gla_provider: Any
     ) -> None:
@@ -242,9 +242,9 @@ class TestModelCreation:
         call_kwargs = mock_gemini_model.call_args[1]
         assert "model_settings" not in call_kwargs
 
-    @patch("codebase_rag.providers.base.GoogleGLAProvider")
-    @patch("codebase_rag.providers.base.GeminiModel")
-    @patch("codebase_rag.providers.base.GeminiModelSettings")
+    @patch("weavr.providers.base.GoogleGLAProvider")
+    @patch("weavr.providers.base.GeminiModel")
+    @patch("weavr.providers.base.GeminiModelSettings")
     def test_google_model_creation_with_thinking_budget(
         self, mock_model_settings: Any, mock_gemini_model: Any, mock_gla_provider: Any
     ) -> None:
@@ -272,8 +272,8 @@ class TestModelCreation:
         assert "model_settings" in call_kwargs
         assert call_kwargs["model_settings"] == mock_settings
 
-    @patch("codebase_rag.providers.base.PydanticOpenAIProvider")
-    @patch("codebase_rag.providers.base.OpenAIResponsesModel")
+    @patch("weavr.providers.base.PydanticOpenAIProvider")
+    @patch("weavr.providers.base.OpenAIResponsesModel")
     def test_openai_model_creation(
         self, mock_openai_model: Any, mock_openai_provider: Any
     ) -> None:
@@ -294,8 +294,8 @@ class TestModelCreation:
             "gpt-4o", provider=mock_openai_provider.return_value
         )
 
-    @patch("codebase_rag.providers.base.PydanticOpenAIProvider")
-    @patch("codebase_rag.providers.base.OpenAIModel")
+    @patch("weavr.providers.base.PydanticOpenAIProvider")
+    @patch("weavr.providers.base.OpenAIModel")
     def test_ollama_model_creation(
         self, mock_openai_model: Any, mock_openai_provider: Any
     ) -> None:

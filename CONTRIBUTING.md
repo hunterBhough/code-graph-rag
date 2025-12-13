@@ -1,10 +1,10 @@
-# Contributing to Code Graph RAG
+# Contributing to Weavr
 
-Thank you for your interest in contributing to Code Graph RAG! We welcome contributions from the community.
+Thank you for your interest in contributing to Weavr! We welcome contributions from the community.
 
 ## Getting Started
 
-1. **Browse Issues**: Check out our [GitHub Issues](https://github.com/vitali87/code-graph-rag/issues) to find tasks that need work
+1. **Browse Issues**: Check out our [GitHub Issues](https://github.com/vitali87/weavr/issues) to find tasks that need work
 2. **Pick an Issue**: Choose an issue that interests you and matches your skill level
 3. **Comment on the Issue**: Let us know you're working on it to avoid duplicate effort
 4. **Fork the Repository**: Create your own fork to work on
@@ -14,8 +14,8 @@ Thank you for your interest in contributing to Code Graph RAG! We welcome contri
 
 1. **Set up Development Environment**:
    ```bash
-   git clone https://github.com/YOUR-USERNAME/code-graph-rag.git
-   cd code-graph-rag
+   git clone https://github.com/YOUR-USERNAME/weavr.git
+   cd weavr
    uv sync --extra treesitter-full --extra test --extra dev
    ```
 

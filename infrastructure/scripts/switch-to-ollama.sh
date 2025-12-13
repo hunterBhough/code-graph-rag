@@ -1,5 +1,5 @@
 #!/bin/bash
-# Switch code-graph-rag back to direct Ollama connection
+# Switch weavr back to direct Ollama connection
 
 set -e
 
@@ -17,7 +17,7 @@ print_header() {
     echo ""
 }
 
-CODE_GRAPH_DIR="/Users/hunter/code/ai_agency/vendor/code-graph-rag"
+CODE_GRAPH_DIR="/Users/hunter/code/ai_agency/vendor/weavr"
 ENV_FILE="$CODE_GRAPH_DIR/.env"
 
 print_header "Switch to Direct Ollama"
@@ -60,6 +60,6 @@ print_header "Next Steps"
 echo "Test direct Ollama:"
 echo "  cd $CODE_GRAPH_DIR"
 echo "  source venv/bin/activate"
-echo '  echo "Show me all classes" | python -m codebase_rag.main'
+echo '  echo "Show me all classes" | python -m weavr.main'
 echo ""
 echo -e "${GREEN}✅ Switched to direct Ollama${NC}"

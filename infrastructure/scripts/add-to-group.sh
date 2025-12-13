@@ -140,7 +140,7 @@ cat > "$PROJECT_PATH/.codebase-intelligence/code-graph/update.sh" << 'SCRIPT_STA
 set -e
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../.. && pwd)"
-CODE_GRAPH_ROOT="/Users/hunter/code/ai_agency/shared/mcp-servers/code-graph-rag"
+CODE_GRAPH_ROOT="/Users/hunter/code/ai_agency/shared/mcp-servers/weavr"
 CENTRALIZED_LOG_DIR="$CODE_GRAPH_ROOT/infrastructure/logs"
 PROJECT_LOG_DIR="$REPO_ROOT/.codebase-intelligence/code-graph/logs"
 LOCAL_LOG="$REPO_ROOT/.codebase-intelligence/code-graph/update.log"
@@ -183,7 +183,7 @@ update_graph() {
 
         export MEMGRAPH_DATABASE="$db_name"
 
-        python -m codebase_rag.main start \
+        python -m weavr.main start \
             --repo-path "$repo_path" \
             --update-graph \
             --no-confirm \

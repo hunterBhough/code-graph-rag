@@ -17,10 +17,10 @@ from fastapi.responses import JSONResponse
 from jsonschema import Draft7Validator, ValidationError as JSONSchemaValidationError
 from loguru import logger
 
-from codebase_rag.config import settings
-from codebase_rag.http.config import HttpServerConfig
-from codebase_rag.http.health import HealthChecker
-from codebase_rag.http.models import (
+from weavr.config import settings
+from weavr.http.config import HttpServerConfig
+from weavr.http.health import HealthChecker
+from weavr.http.models import (
     CallToolRequest,
     DependencyStatus,
     ErrorCode,
@@ -29,9 +29,9 @@ from codebase_rag.http.models import (
     ServiceInfo,
     ToolSchema,
 )
-from codebase_rag.mcp.tools import MCPToolsRegistry, create_mcp_tools_registry
-from codebase_rag.services.graph_service import MemgraphIngestor
-from codebase_rag.services.llm import CypherGenerator
+from weavr.mcp.tools import MCPToolsRegistry, create_mcp_tools_registry
+from weavr.services.graph_service import MemgraphIngestor
+from weavr.services.llm import CypherGenerator
 
 # Global state
 _server_start_time: Optional[float] = None
@@ -112,7 +112,7 @@ def discover_tools() -> ServiceInfo:
 
     # Build ServiceInfo response
     return ServiceInfo(
-        service=_config.service.name if _config else "code-graph-rag",
+        service=_config.service.name if _config else "weavr",
         version="0.0.24",
         tools=tools,
     )
@@ -144,7 +144,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         )
     else:
         _health_checker = HealthChecker(
-            service_name="code-graph-rag",
+            service_name="weavr",
             version="0.0.24",
         )
     await _health_checker.start()

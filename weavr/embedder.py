@@ -1,4 +1,4 @@
-# codebase_rag/embedder.py
+# weavr/embedder.py
 """Code embedding using TEI (Text Embeddings Inference) with bge-m3 model."""
 import functools
 import json
@@ -14,7 +14,7 @@ def get_embedding_config() -> dict[str, str]:
     Returns:
         Dict with endpoint URL and model name
     """
-    from codebase_rag.config import settings
+    from weavr.config import settings
 
     return {
         "endpoint": settings.EMBEDDING_ENDPOINT,

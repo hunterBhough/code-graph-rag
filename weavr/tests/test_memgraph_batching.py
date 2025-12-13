@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from codebase_rag.services.graph_service import MemgraphIngestor
+from weavr.services.graph_service import MemgraphIngestor
 
 
 def _create_ingestor_with_mocked_connection(

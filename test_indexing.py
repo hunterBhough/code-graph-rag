@@ -7,10 +7,10 @@ from pathlib import Path
 # Add the project to the path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from codebase_rag.config import settings
-from codebase_rag.embedder import embed_code
-from codebase_rag.services.graph_service import MemgraphIngestor
-from codebase_rag.tools.semantic_search import semantic_code_search, get_function_source_code
+from weavr.config import settings
+from weavr.embedder import embed_code
+from weavr.services.graph_service import MemgraphIngestor
+from weavr.tools.semantic_search import semantic_code_search, get_function_source_code
 
 
 def test_basic_graph_query():
@@ -23,7 +23,7 @@ def test_basic_graph_query():
         host=settings.MEMGRAPH_HOST,
         port=settings.MEMGRAPH_PORT,
         batch_size=100,
-        project_name="code-graph-rag"
+        project_name="weavr"
     ) as ingestor:
         # Count total nodes
         count_query = "MATCH (n) RETURN count(n) AS total"

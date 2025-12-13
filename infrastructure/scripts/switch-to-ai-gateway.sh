@@ -1,5 +1,5 @@
 #!/bin/bash
-# Switch code-graph-rag to use AI Gateway for intelligent routing
+# Switch weavr to use AI Gateway for intelligent routing
 
 set -e
 
@@ -18,7 +18,7 @@ print_header() {
     echo ""
 }
 
-CODE_GRAPH_DIR="/Users/hunter/code/ai_agency/vendor/code-graph-rag"
+CODE_GRAPH_DIR="/Users/hunter/code/ai_agency/vendor/weavr"
 ENV_FILE="$CODE_GRAPH_DIR/.env"
 
 print_header "Switch to AI Gateway"
@@ -88,7 +88,7 @@ print_header "Next Steps"
 echo "Test the integration:"
 echo "  cd $CODE_GRAPH_DIR"
 echo "  source venv/bin/activate"
-echo '  echo "Show me all classes" | python -m codebase_rag.main'
+echo '  echo "Show me all classes" | python -m weavr.main'
 echo ""
 echo "Monitor AI Gateway:"
 echo "  curl http://localhost:8000/usage | python3 -m json.tool"

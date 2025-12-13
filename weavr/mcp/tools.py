@@ -1,4 +1,4 @@
-"""MCP tool wrappers for code-graph-rag.
+"""MCP tool wrappers for weavr.
 
 This module adapts pydantic-ai Tool instances to MCP-compatible functions.
 """
@@ -11,20 +11,20 @@ from typing import Any, cast
 
 from loguru import logger
 
-from codebase_rag.graph_updater import GraphUpdater
-from codebase_rag.parser_loader import load_parsers
-from codebase_rag.services.graph_service import MemgraphIngestor
-from codebase_rag.services.llm import CypherGenerator
-from codebase_rag.tools.code_retrieval import CodeRetriever, create_code_retrieval_tool
-from codebase_rag.tools.codebase_query import create_query_tool
-from codebase_rag.tools.directory_lister import (
+from weavr.graph_updater import GraphUpdater
+from weavr.parser_loader import load_parsers
+from weavr.services.graph_service import MemgraphIngestor
+from weavr.services.llm import CypherGenerator
+from weavr.tools.code_retrieval import CodeRetriever, create_code_retrieval_tool
+from weavr.tools.codebase_query import create_query_tool
+from weavr.tools.directory_lister import (
     DirectoryLister,
     create_directory_lister_tool,
 )
-from codebase_rag.tools.file_editor import FileEditor, create_file_editor_tool
-from codebase_rag.tools.file_reader import FileReader, create_file_reader_tool
-from codebase_rag.tools.file_writer import FileWriter, create_file_writer_tool
-from codebase_rag.tools.structural_queries import (
+from weavr.tools.file_editor import FileEditor, create_file_editor_tool
+from weavr.tools.file_reader import FileReader, create_file_reader_tool
+from weavr.tools.file_writer import FileWriter, create_file_writer_tool
+from weavr.tools.structural_queries import (
     create_find_callers_tool,
     create_class_hierarchy_tool,
     create_dependency_analysis_tool,

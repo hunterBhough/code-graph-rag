@@ -7,7 +7,7 @@ from typing import Optional
 import mgclient
 from loguru import logger
 
-from codebase_rag.http.models import DependencyStatus, HealthStatus
+from weavr.http.models import DependencyStatus, HealthStatus
 
 
 class HealthChecker:

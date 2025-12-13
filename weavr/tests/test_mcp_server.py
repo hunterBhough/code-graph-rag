@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
-from codebase_rag.mcp.server import get_project_root
+from weavr.mcp.server import get_project_root
 
 
 class TestGetProjectRoot:
@@ -34,7 +34,7 @@ class TestGetProjectRoot:
                 del os.environ["TARGET_REPO_PATH"]
 
             # Mock settings
-            with patch("codebase_rag.mcp.server.settings") as mock_settings:
+            with patch("weavr.mcp.server.settings") as mock_settings:
                 mock_settings.TARGET_REPO_PATH = str(test_path)
                 result = get_project_root()
 
@@ -56,7 +56,7 @@ class TestGetProjectRoot:
         if "TARGET_REPO_PATH" in os.environ:
             monkeypatch.delenv("TARGET_REPO_PATH")
 
-        with patch("codebase_rag.mcp.server.settings") as mock_settings:
+        with patch("weavr.mcp.server.settings") as mock_settings:
             mock_settings.TARGET_REPO_PATH = None
             result = get_project_root()
 
@@ -75,7 +75,7 @@ class TestGetProjectRoot:
         if "TARGET_REPO_PATH" in os.environ:
             monkeypatch.delenv("TARGET_REPO_PATH")
 
-        with patch("codebase_rag.mcp.server.settings") as mock_settings:
+        with patch("weavr.mcp.server.settings") as mock_settings:
             mock_settings.TARGET_REPO_PATH = ""
             result = get_project_root()
 
@@ -89,7 +89,7 @@ class TestGetProjectRoot:
         settings_path.mkdir()
 
         with patch.dict(os.environ, {"TARGET_REPO_PATH": str(env_path)}):
-            with patch("codebase_rag.mcp.server.settings") as mock_settings:
+            with patch("weavr.mcp.server.settings") as mock_settings:
                 mock_settings.TARGET_REPO_PATH = str(settings_path)
                 result = get_project_root()
 
@@ -159,7 +159,7 @@ class TestGetProjectRoot:
         if "TARGET_REPO_PATH" in os.environ:
             monkeypatch.delenv("TARGET_REPO_PATH")
 
-        with patch("codebase_rag.mcp.server.settings") as mock_settings:
+        with patch("weavr.mcp.server.settings") as mock_settings:
             mock_settings.TARGET_REPO_PATH = None
             # Should not raise any exceptions
             result = get_project_root()
@@ -179,7 +179,7 @@ class TestGetProjectRoot:
             if "TARGET_REPO_PATH" in os.environ:
                 del os.environ["TARGET_REPO_PATH"]
 
-            with patch("codebase_rag.mcp.server.settings") as mock_settings:
+            with patch("weavr.mcp.server.settings") as mock_settings:
                 mock_settings.TARGET_REPO_PATH = None
                 result = get_project_root()
 

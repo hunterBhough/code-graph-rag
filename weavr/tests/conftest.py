@@ -10,9 +10,9 @@ import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-from codebase_rag.graph_updater import GraphUpdater
-from codebase_rag.parser_loader import load_parsers
-from codebase_rag.services.graph_service import MemgraphIngestor
+from weavr.graph_updater import GraphUpdater
+from weavr.parser_loader import load_parsers
+from weavr.services.graph_service import MemgraphIngestor
 
 
 @pytest.fixture

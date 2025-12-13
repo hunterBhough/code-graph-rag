@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from loguru import logger
 
-from codebase_rag.services.graph_service import MemgraphIngestor
+from weavr.services.graph_service import MemgraphIngestor
 
 
 @pytest.fixture

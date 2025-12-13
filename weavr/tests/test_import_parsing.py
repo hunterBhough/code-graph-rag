@@ -6,8 +6,8 @@ import pytest
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser
 
-from codebase_rag.graph_updater import FunctionRegistryTrie, GraphUpdater
-from codebase_rag.parser_loader import load_parsers
+from weavr.graph_updater import FunctionRegistryTrie, GraphUpdater
+from weavr.parser_loader import load_parsers
 
 
 class TestImportParsing:

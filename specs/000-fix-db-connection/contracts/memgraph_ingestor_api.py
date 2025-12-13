@@ -368,9 +368,9 @@ Example 3: Environment Variable Configuration
 ----------------------------------------------
 
 # In .env file or environment:
-# MEMGRAPH_DATABASE=codegraph_code-graph-rag
+# MEMGRAPH_DATABASE=codegraph_weavr
 
-from codebase_rag.config import settings
+from weavr.config import settings
 
 with MemgraphIngestor(host='localhost', port=7687) as ingestor:
     # database_name defaults to settings.MEMGRAPH_DATABASE
@@ -384,7 +384,7 @@ Example 4: Stress Test Usage (User Story 2)
 --------------------------------------------
 
 import os
-os.environ['MEMGRAPH_DATABASE'] = 'codegraph_code-graph-rag'
+os.environ['MEMGRAPH_DATABASE'] = 'codegraph_weavr'
 
 ingestor = MemgraphIngestor(
     host=os.getenv('MEMGRAPH_HOST', 'localhost'),
@@ -395,7 +395,7 @@ with ingestor:
     results = ingestor._execute_query(
         "MATCH (f:Function) RETURN f.qualified_name LIMIT 10"
     )
-    # Results come from codegraph_code-graph-rag database only
+    # Results come from codegraph_weavr database only
 
 
 Example 5: Integration Test Isolation (User Story 3)

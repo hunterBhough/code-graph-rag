@@ -16,7 +16,7 @@ External Dependencies (Optional - Enhanced Accuracy):
     - C++ compiler (g++): For C++ standard library analysis
 
 Performance Optimizations:
-    - Results are cached in memory and persistently to disk (~/.cache/codebase_rag/)
+    - Results are cached in memory and persistently to disk (~/.cache/weavr/)
     - External tool availability is cached to avoid repeated PATH checks
     - Fallback heuristics ensure functionality without external dependencies
 """
@@ -105,7 +105,7 @@ def _cache_stdlib_result(language: str, full_qualified_name: str, result: str) -
 def _load_persistent_cache() -> None:
     """Load persistent cache from disk if available."""
     try:
-        cache_file = Path.home() / ".cache" / "codebase_rag" / "stdlib_cache.json"
+        cache_file = Path.home() / ".cache" / "weavr" / "stdlib_cache.json"
         if cache_file.exists():
             with cache_file.open() as f:
                 data = json.load(f)
@@ -119,7 +119,7 @@ def _load_persistent_cache() -> None:
 def _save_persistent_cache() -> None:
     """Save persistent cache to disk."""
     try:
-        cache_dir = Path.home() / ".cache" / "codebase_rag"
+        cache_dir = Path.home() / ".cache" / "weavr"
         cache_dir.mkdir(parents=True, exist_ok=True)
         cache_file = cache_dir / "stdlib_cache.json"
 
@@ -176,7 +176,7 @@ class ImportProcessor:
         _STDLIB_CACHE.clear()
         _CACHE_TIMESTAMPS.clear()
         try:
-            cache_file = Path.home() / ".cache" / "codebase_rag" / "stdlib_cache.json"
+            cache_file = Path.home() / ".cache" / "weavr" / "stdlib_cache.json"
             if cache_file.exists():
                 cache_file.unlink()
                 logger.debug("Cleared stdlib cache from disk")

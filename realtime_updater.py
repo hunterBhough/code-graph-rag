@@ -8,11 +8,11 @@ from loguru import logger
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-from codebase_rag.config import IGNORE_PATTERNS, IGNORE_SUFFIXES, settings
-from codebase_rag.graph_updater import GraphUpdater
-from codebase_rag.language_config import get_language_config
-from codebase_rag.parser_loader import load_parsers
-from codebase_rag.services.graph_service import MemgraphIngestor
+from weavr.config import IGNORE_PATTERNS, IGNORE_SUFFIXES, settings
+from weavr.graph_updater import GraphUpdater
+from weavr.language_config import get_language_config
+from weavr.parser_loader import load_parsers
+from weavr.services.graph_service import MemgraphIngestor
 
 
 class CodeChangeEventHandler(FileSystemEventHandler):

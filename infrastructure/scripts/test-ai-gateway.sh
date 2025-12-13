@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test AI Gateway integration with code-graph-rag
+# Test AI Gateway integration with weavr
 
 set -e
 
@@ -18,7 +18,7 @@ print_header() {
     echo ""
 }
 
-CODE_GRAPH_DIR="/Users/hunter/code/ai_agency/vendor/code-graph-rag"
+CODE_GRAPH_DIR="/Users/hunter/code/ai_agency/vendor/weavr"
 
 print_header "AI Gateway Integration Test"
 
@@ -48,9 +48,9 @@ else
     exit 1
 fi
 
-# 3. Check code-graph-rag configuration
+# 3. Check weavr configuration
 echo ""
-echo -e "${BLUE}3. Checking code-graph-rag configuration...${NC}"
+echo -e "${BLUE}3. Checking weavr configuration...${NC}"
 if grep -q "ORCHESTRATOR_ENDPOINT=http://localhost:8000/v1" "$CODE_GRAPH_DIR/.env"; then
     echo -e "${GREEN}✅ Configured to use AI Gateway${NC}"
 else
@@ -61,7 +61,7 @@ fi
 
 # 4. Test with sample query
 echo ""
-echo -e "${BLUE}4. Testing code-graph-rag query...${NC}"
+echo -e "${BLUE}4. Testing weavr query...${NC}"
 echo ""
 cd "$CODE_GRAPH_DIR"
 source venv/bin/activate
@@ -69,7 +69,7 @@ source venv/bin/activate
 echo -e "${YELLOW}Running: 'What is this codebase about?'${NC}"
 echo ""
 
-if echo "What is this codebase about?" | python -m codebase_rag.main 2>&1 | tee /tmp/cgr-test.log; then
+if echo "What is this codebase about?" | python -m weavr.main 2>&1 | tee /tmp/cgr-test.log; then
     echo ""
     echo -e "${GREEN}✅ Query completed${NC}"
 else

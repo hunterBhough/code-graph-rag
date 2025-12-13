@@ -22,7 +22,7 @@ mcp-servers:
     - ~/code/ai_agency/shared/mcp-servers/mcp-service-wrappers
     - ~/code/ai_agency/shared/mcp-servers/conversational-memory-mcp
     - ~/code/ai_agency/shared/scripts/codebase-intelligence
-    - ~/code/ai_agency/vendor/code-graph-rag
+    - ~/code/ai_agency/vendor/weavr
 
 # Dashboard Projects
 dashboard:

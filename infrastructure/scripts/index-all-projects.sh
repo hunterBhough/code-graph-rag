@@ -1,5 +1,5 @@
 #!/opt/homebrew/bin/bash
-# Master script to index all projects with code-graph-rag and vector-search-mcp
+# Master script to index all projects with weavr and vector-search-mcp
 # Created: 2025-12-02
 # Requires bash 4+ for associative arrays
 
@@ -28,7 +28,7 @@ VECTOR_SEARCH_INIT="/Users/hunter/code/ai_agency/shared/mcp-servers/seekr/init-p
 # Define all projects with their paths and groups
 declare -A PROJECTS=(
     # MCP Servers group
-    ["code-graph-rag"]="/Users/hunter/code/ai_agency/shared/mcp-servers/code-graph-rag:mcp-servers"
+    ["weavr"]="/Users/hunter/code/ai_agency/shared/mcp-servers/weavr:mcp-servers"
     ["ai-gateway-mcp"]="/Users/hunter/code/ai_agency/shared/mcp-servers/ai-gateway-mcp:mcp-servers"
     ["conversational-memory-mcp"]="/Users/hunter/code/ai_agency/shared/mcp-servers/conversational-memory-mcp:mcp-servers"
     ["mcp-service-wrappers"]="/Users/hunter/code/ai_agency/shared/mcp-servers/mcp-service-wrappers:mcp-servers"
@@ -63,10 +63,10 @@ check_dependencies() {
     log_header "Checking Dependencies"
 
     if [ ! -f "$CODE_GRAPH_INIT" ]; then
-        log_error "code-graph-rag init script not found: $CODE_GRAPH_INIT"
+        log_error "weavr init script not found: $CODE_GRAPH_INIT"
         exit 1
     fi
-    log_success "Found code-graph-rag init script"
+    log_success "Found weavr init script"
 
     if [ ! -f "$VECTOR_SEARCH_INIT" ]; then
         log_error "vector-search-mcp init script not found: $VECTOR_SEARCH_INIT"
@@ -102,8 +102,8 @@ index_project() {
     log "Group: $group"
     echo ""
 
-    # Index with code-graph-rag
-    log "📊 Initializing code-graph-rag..."
+    # Index with weavr
+    log "📊 Initializing weavr..."
     if "$CODE_GRAPH_INIT" "$path" --group "$group" --no-hook; then
         log_success "Code-graph initialized"
     else

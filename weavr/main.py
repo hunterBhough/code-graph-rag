@@ -56,7 +56,7 @@ _FILE_MODIFICATION_PATTERNS = [
 
 
 app = typer.Typer(
-    name="graph-code",
+    name="weavr",
     help="An accurate Retrieval-Augmented Generation (RAG) system that analyzes "
     "multi-language codebases using Tree-sitter, builds comprehensive knowledge "
     "graphs, and enables natural language querying of codebase structure and "
@@ -176,7 +176,7 @@ def _setup_common_initialization(repo_path: str) -> Path:
 
 def _create_configuration_table(
     repo_path: str,
-    title: str = "Graph-Code Initializing...",
+    title: str = "Weavr Initializing...",
     language: str | None = None,
 ) -> Table:
     """Create and return a configuration table."""
@@ -834,7 +834,7 @@ def start(
         help="Number of buffered nodes/relationships before flushing to Memgraph",
     ),
 ) -> None:
-    """Starts the Codebase RAG CLI."""
+    """Starts the Weavr CLI."""
     global confirm_edits_globally
 
     # Set confirmation mode based on flag
@@ -1040,23 +1040,23 @@ def optimize(
 def mcp_server() -> None:
     """Start the MCP (Model Context Protocol) server.
 
-    This command starts an MCP server that exposes code-graph-rag's capabilities
+    This command starts an MCP server that exposes weavr's capabilities
     to MCP clients like Claude Code. The server runs on stdio transport and requires
     the TARGET_REPO_PATH environment variable to be set to the target repository.
 
     Usage:
-        graph-code mcp-server
+        weavr mcp-server
 
     Environment Variables:
         TARGET_REPO_PATH: Path to the target repository (required)
 
     For Claude Code integration:
-        claude mcp add --transport stdio graph-code \\
+        claude mcp add --transport stdio weavr \\
           --env TARGET_REPO_PATH=/path/to/your/project \\
-          -- uv run --directory /path/to/code-graph-rag graph-code mcp-server
+          -- uv run --directory /path/to/weavr weavr mcp-server
     """
     try:
-        from codebase_rag.mcp import main as mcp_main
+        from weavr.mcp import main as mcp_main
 
         asyncio.run(mcp_main())
     except KeyboardInterrupt:

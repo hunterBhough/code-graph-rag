@@ -10,8 +10,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from codebase_rag.graph_updater import GraphUpdater
-from codebase_rag.services.graph_service import MemgraphIngestor
+from weavr.graph_updater import GraphUpdater
+from weavr.services.graph_service import MemgraphIngestor
 
 
 @pytest.fixture
@@ -114,7 +114,7 @@ def test_complex_cross_file_function_calls(
     including calls to functions with short names, functions in different packages,
     and method calls across modules.
     """
-    from codebase_rag.parser_loader import load_parsers
+    from weavr.parser_loader import load_parsers
 
     parsers, queries = load_parsers()
 
@@ -198,7 +198,7 @@ def test_cross_file_calls_with_short_names(
     Specifically tests that functions with short names (like 'short') are correctly
     resolved across files, which was a problem with the previous heuristic implementation.
     """
-    from codebase_rag.parser_loader import load_parsers
+    from weavr.parser_loader import load_parsers
 
     parsers, queries = load_parsers()
 

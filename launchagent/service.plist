@@ -7,12 +7,12 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/hunter/code/ai_agency/shared/mcp-servers/code-graph-rag/.venv/bin/python</string>
-        <string>/Users/hunter/code/ai_agency/shared/mcp-servers/code-graph-rag/http_server/server.py</string>
+        <string>/Users/hunter/code/ai_agency/shared/mcp-servers/weavr/.venv/bin/python</string>
+        <string>/Users/hunter/code/ai_agency/shared/mcp-servers/weavr/http_server/server.py</string>
     </array>
 
     <key>WorkingDirectory</key>
-    <string>/Users/hunter/code/ai_agency/shared/mcp-servers/code-graph-rag</string>
+    <string>/Users/hunter/code/ai_agency/shared/mcp-servers/weavr</string>
 
     <key>StandardOutPath</key>
     <string>/Users/hunter/Library/Logs/graph-code-stdout.log</string>

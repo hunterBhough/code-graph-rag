@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from codebase_rag.mcp.tools import MCPToolsRegistry
+from weavr.mcp.tools import MCPToolsRegistry
 
 pytestmark = [pytest.mark.anyio]
 

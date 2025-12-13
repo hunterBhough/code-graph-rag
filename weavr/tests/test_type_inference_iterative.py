@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
-from codebase_rag.parsers.type_inference import TypeInferenceEngine
+from weavr.parsers.type_inference import TypeInferenceEngine
 
 
 class NodeStub:

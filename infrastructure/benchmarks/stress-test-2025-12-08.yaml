@@ -1,14 +1,14 @@
 metadata:
   date: "2025-12-08"
   time: "12:20:00"
-  codebase: "code-graph-rag"
+  codebase: "weavr"
   memgraph_version: "memgraph/memgraph-mage"
   indexed_files: 309
   indexed_nodes: 2312
   indexed_classes: 102
   indexed_functions: 1714
   test_environment: "Local development with Ollama (qwen2.5-coder:32b)"
-  database_name: "codegraph_code-graph-rag"
+  database_name: "codegraph_weavr"
 
 results:
   basic_queries:
@@ -70,28 +70,28 @@ results:
 
   code_retrieval:
     C1:
-      qualified_name: "codebase_rag.mcp.tools.MCPToolsRegistry"
+      qualified_name: "weavr.mcp.tools.MCPToolsRegistry"
       status: "partial"
       response_time_ms: 0
       found: false
       notes: "Database connection issue, not a code retrieval failure"
 
     C2:
-      qualified_name: "codebase_rag.services.llm.CypherGenerator.generate"
+      qualified_name: "weavr.services.llm.CypherGenerator.generate"
       status: "partial"
       response_time_ms: 0
       found: false
       notes: "Database connection issue"
 
     C3:
-      qualified_name: "codebase_rag.prompts.GRAPH_SCHEMA_AND_RULES"
+      qualified_name: "weavr.prompts.GRAPH_SCHEMA_AND_RULES"
       status: "partial"
       response_time_ms: 0
       found: false
       notes: "Database connection issue"
 
     C4:
-      qualified_name: "codebase_rag.tools.codebase_query.create_query_tool"
+      qualified_name: "weavr.tools.codebase_query.create_query_tool"
       status: "partial"
       response_time_ms: 0
       found: false

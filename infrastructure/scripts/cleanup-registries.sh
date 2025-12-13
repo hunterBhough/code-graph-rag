@@ -55,7 +55,7 @@ cleanup_registry() {
 }
 
 # Clean up both registries
-cleanup_registry "/Users/hunter/code/ai_agency/shared/mcp-servers/code-graph-rag/infrastructure/registry/projects.toon"
+cleanup_registry "/Users/hunter/code/ai_agency/shared/mcp-servers/weavr/infrastructure/registry/projects.toon"
 # cleanup_registry "/Users/hunter/code/ai_agency/shared/mcp-servers/seekr/infrastructure/registry/projects.toon"  # Seekr no longer uses .toon files
 
 echo ""

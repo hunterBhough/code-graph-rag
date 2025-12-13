@@ -1,4 +1,4 @@
-# codebase_rag/vector_store.py
+# weavr/vector_store.py
 from loguru import logger
 
 from .config import settings
@@ -16,7 +16,7 @@ if has_qdrant_client():
         global _CLIENT
         if _CLIENT is None:
             _CLIENT = QdrantClient(
-                path="./.mcp/codebase-intelligence/code-graph-rag/.qdrant"
+                path="./.mcp/codebase-intelligence/weavr/.qdrant"
             )
             if not _CLIENT.collection_exists(_COLLECTION):
                 _CLIENT.create_collection(

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from codebase_rag.graph_updater import GraphUpdater
+from weavr.graph_updater import GraphUpdater
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def test_defines_method_relationship_is_created(
     """
     Tests that GraphUpdater correctly identifies and creates DEFINES_METHOD relationships.
     """
-    from codebase_rag.parser_loader import load_parsers
+    from weavr.parser_loader import load_parsers
 
     parsers, queries = load_parsers()
 

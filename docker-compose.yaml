@@ -1,15 +1,15 @@
-# Codebase Intelligence Infrastructure
+# Weavr Infrastructure
 # Shared Memgraph instance for:
-# - code-graph-rag (structural code analysis)
+# - weavr (structural code analysis)
 # - vector-search-mcp (semantic code search)
 # - docwell (document search)
 
-name: codebase-intelligence
+name: weavr
 
 services:
   memgraph:
     image: memgraph/memgraph-mage
-    container_name: codebase-intelligence-memgraph
+    container_name: weavr-memgraph
     ports:
       - "${MEMGRAPH_PORT:-7687}:7687"       # Bolt protocol
       - "${MEMGRAPH_HTTP_PORT:-7444}:7444"  # HTTP API
@@ -21,7 +21,7 @@ services:
 
   lab:
     image: memgraph/lab
-    container_name: codebase-intelligence-lab
+    container_name: weavr-lab
     ports:
       - "${LAB_PORT:-3000}:3000"
     environment:
@@ -32,4 +32,4 @@ services:
 
 volumes:
   memgraph-data:
-    name: codebase-intelligence-memgraph-data
+    name: weavr-memgraph-data

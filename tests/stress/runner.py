@@ -23,8 +23,8 @@ except ImportError:
 # Add parent directories to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from codebase_rag.mcp.tools import create_mcp_tools_registry
-from codebase_rag.services.graph_service import MemgraphIngestor
+from weavr.mcp.tools import create_mcp_tools_registry
+from weavr.services.graph_service import MemgraphIngestor
 from tests.stress.test_structural_queries import StructuralQueriesTest
 from tests.stress.test_parameter_validation import ParameterValidationTest
 from tests.stress.test_edge_cases import EdgeCasesTest

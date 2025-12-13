@@ -1,8 +1,10 @@
-# code-graph-rag
+# weavr
 
 MCP server for structured code graph queries using Tree-sitter and Memgraph.
 
 Answer structural questions about codebases: who calls this function, what inherits from that class, what are the circular dependencies. Complements semantic search (seekr) and document search (docwell) with precise relationship analysis.
+
+**Note**: Weavr is the renamed successor to the code-graph-rag project, now with a more descriptive name reflecting its core purpose of weaving connections between code structures.
 
 ## Quick Start
 
@@ -21,13 +23,13 @@ docker compose up -d
 ### 3. Index Your Project
 
 ```bash
-uv run graph-code index
+uv run weavr index
 ```
 
 ### 4. Query Interactively
 
 ```bash
-uv run graph-code chat "Who calls UserService.create_user?"
+uv run weavr chat "Who calls UserService.create_user?"
 ```
 
 ## Key Capabilities
@@ -55,16 +57,16 @@ uv run graph-code chat "Who calls UserService.create_user?"
 
 ```bash
 # Find callers
-uv run graph-code chat "Who calls verify_token?"
+uv run weavr chat "Who calls verify_token?"
 
 # Class hierarchy
-uv run graph-code chat "Show inheritance for BaseModel"
+uv run weavr chat "Show inheritance for BaseModel"
 
 # Dependencies
-uv run graph-code chat "What does auth.py import?"
+uv run weavr chat "What does auth.py import?"
 
 # Call graph
-uv run graph-code chat "Show call stack for login()"
+uv run weavr chat "Show call stack for login()"
 ```
 
 ### MCP Server
@@ -74,10 +76,10 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 ```json
 {
   "mcpServers": {
-    "code-graph-rag": {
+    "weavr": {
       "command": "uv",
-      "args": ["run", "graph-code", "mcp"],
-      "cwd": "/path/to/code-graph-rag"
+      "args": ["run", "weavr", "mcp"],
+      "cwd": "/path/to/weavr"
     }
   }
 }
@@ -96,7 +98,7 @@ Available tools:
 
 ```bash
 # Start server
-uv run graph-code http
+uv run weavr http
 
 # Query via POST
 curl -X POST http://localhost:8000/api/tools/query_callers \
@@ -107,7 +109,7 @@ curl -X POST http://localhost:8000/api/tools/query_callers \
 ## Project Structure
 
 ```
-codebase_rag/
+weavr/
 ├── main.py              # CLI entry point
 ├── mcp/                 # MCP server & tools
 ├── http/                # HTTP server
@@ -154,9 +156,13 @@ Supported providers: `anthropic`, `openai`, `google` (Vertex AI), `ollama`
 
 **seekr** - Semantic code search via vector embeddings
 **docwell** - Documentation search via vector embeddings
-**code-graph-rag** - Structural relationship queries via knowledge graph
+**weavr** - Structural relationship queries via knowledge graph
 
 Use together for comprehensive codebase understanding.
+
+## Attribution
+
+Weavr is the renamed successor to the original [code-graph-rag](https://github.com/vitali87/code-graph-rag) project. The new name "weavr" better reflects the project's core purpose of weaving connections between code structures through structural analysis.
 
 ## Development
 
@@ -168,7 +174,7 @@ uv run pytest
 uv run ruff check
 
 # Type check
-uv run mypy codebase_rag
+uv run mypy weavr
 
 # Format
 uv run ruff format

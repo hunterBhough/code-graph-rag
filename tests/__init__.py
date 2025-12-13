@@ -1,1 +1,1 @@
-"""Test suite for code-graph-rag."""
+"""Test suite for weavr."""

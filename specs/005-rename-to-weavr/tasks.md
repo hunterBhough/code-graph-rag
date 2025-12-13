@@ -87,19 +87,19 @@
 
 ### Implementation for User Story 2
 
-- [ ] T029 [P] [US2] Update project name and description in `README.md` to "weavr"
-- [ ] T030 [P] [US2] Add attribution section in `README.md` crediting original code-graph-rag project
-- [ ] T031 [P] [US2] Update project identity and metaphor explanation in `CLAUDE.md`
-- [ ] T032 [P] [US2] Update all references to project name in `docs/ARCHITECTURE.md`
-- [ ] T033 [P] [US2] Update all references to project name in `docs/VISION.md`
-- [ ] T034 [P] [US2] Update CLI command examples in documentation from `graph-code` to `weavr`
-- [ ] T035 [P] [US2] Update installation instructions in `README.md` to use "weavr" package name
-- [ ] T036 [P] [US2] Search and update inline code comments referencing project name using `rg "code.graph.rag|graph-code" --type py`
-- [ ] T037 [P] [US2] Update contributing guidelines in `CONTRIBUTING.md` with new project name
-- [ ] T038 [P] [US2] Update any example code files in `examples/` directory to use new imports
-- [ ] T039 [P] [US2] Update configuration examples in `config/` directory with new naming
-- [ ] T040 [US2] Verify documentation consistency: Search for any remaining "code-graph-rag" references in docs
-- [ ] T041 [US2] Review and update MCP server configuration examples with new name
+- [X] T029 [P] [US2] Update project name and description in `README.md` to "weavr"
+- [X] T030 [P] [US2] Add attribution section in `README.md` crediting original code-graph-rag project
+- [X] T031 [P] [US2] Update project identity and metaphor explanation in `CLAUDE.md`
+- [X] T032 [P] [US2] Update all references to project name in `docs/ARCHITECTURE.md`
+- [X] T033 [P] [US2] Update all references to project name in `docs/VISION.md`
+- [X] T034 [P] [US2] Update CLI command examples in documentation from `graph-code` to `weavr`
+- [X] T035 [P] [US2] Update installation instructions in `README.md` to use "weavr" package name
+- [X] T036 [P] [US2] Search and update inline code comments referencing project name using `rg "code.graph.rag|graph-code" --type py`
+- [X] T037 [P] [US2] Update contributing guidelines in `CONTRIBUTING.md` with new project name
+- [X] T038 [P] [US2] Update any example code files in `examples/` directory to use new imports
+- [X] T039 [P] [US2] Update configuration examples in `config/` directory with new naming
+- [X] T040 [US2] Verify documentation consistency: Search for any remaining "code-graph-rag" references in docs
+- [X] T041 [US2] Review and update MCP server configuration examples with new name
 
 **Checkpoint**: Documentation complete - all docs consistently reference "weavr"
 

@@ -27,7 +27,7 @@ VECTOR_SEARCH_INIT="/Users/hunter/code/ai_agency/shared/mcp-servers/seekr/init-p
 
 # All project paths
 PROJECTS=(
-    "/Users/hunter/code/ai_agency/shared/mcp-servers/code-graph-rag:mcp-servers"
+    "/Users/hunter/code/ai_agency/shared/mcp-servers/weavr:mcp-servers"
     "/Users/hunter/code/ai_agency/shared/mcp-servers/ai-gateway-mcp:mcp-servers"
     "/Users/hunter/code/ai_agency/shared/mcp-servers/conversational-memory-mcp:mcp-servers"
     "/Users/hunter/code/ai_agency/shared/mcp-servers/mcp-service-wrappers:mcp-servers"
@@ -76,7 +76,7 @@ for project_info in "${PROJECTS[@]}"; do
         continue
     fi
 
-    # Initialize with code-graph-rag
+    # Initialize with weavr
     code_graph_success=false
     if "$CODE_GRAPH_INIT" "$path" --group "$group" --no-hook >/dev/null 2>&1; then
         log_success "Code-graph: $name"

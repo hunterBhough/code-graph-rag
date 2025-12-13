@@ -1,4 +1,4 @@
-"""Structural query tools for code-graph-rag.
+"""Structural query tools for weavr.
 
 This module provides pre-built structural query tools for exploring code relationships:
 - Function callers and callees
@@ -193,7 +193,7 @@ def create_truncation_message(
 
 
 class CodeGraphError(Exception):
-    """Base exception for all code-graph-rag errors."""
+    """Base exception for all weavr errors."""
 
     pass
 

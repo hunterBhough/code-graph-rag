@@ -6,8 +6,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from codebase_rag.config import settings
-from codebase_rag.services.graph_service import MemgraphIngestor
+from weavr.config import settings
+from weavr.services.graph_service import MemgraphIngestor
 
 
 def test_project_isolation():

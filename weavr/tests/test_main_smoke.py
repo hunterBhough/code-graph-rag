@@ -18,7 +18,7 @@ def test_help_command_works() -> None:
 
     # Run the help command as a subprocess to test the actual CLI
     result = subprocess.run(
-        [sys.executable, "-m", "codebase_rag.main", "--help"],
+        [sys.executable, "-m", "weavr.main", "--help"],
         cwd=repo_root,
         capture_output=True,
         text=True,
@@ -39,7 +39,7 @@ def test_help_command_works() -> None:
 def test_import_main_module() -> None:
     """Test that the main module can be imported without errors."""
     try:
-        from codebase_rag import main
+        from weavr import main
 
         # Basic check that the module loaded
         assert hasattr(main, "app") or hasattr(main, "main"), (

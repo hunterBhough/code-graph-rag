@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build script for creating Graph-Code binaries using PyInstaller.
+Build script for creating Weavr binaries using PyInstaller.
 This handles the complex dependencies and package metadata issues.
 """
 
@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 def build_binary() -> bool:
-    """Build the Graph-Code binary using PyInstaller."""
+    """Build the Weavr binary using PyInstaller."""
 
     # Get platform info for naming
     system = platform.system().lower()
@@ -22,7 +22,7 @@ def build_binary() -> bool:
     elif machine in ["aarch64", "arm64"]:
         machine = "arm64"
 
-    binary_name = f"graph-code-{system}-{machine}"
+    binary_name = f"weavr-{system}-{machine}"
 
     # PyInstaller command with all necessary options
     cmd = [

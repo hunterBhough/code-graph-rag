@@ -15,8 +15,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from codebase_rag.graph_updater import GraphUpdater
-from codebase_rag.services.graph_service import MemgraphIngestor
+from weavr.graph_updater import GraphUpdater
+from weavr.services.graph_service import MemgraphIngestor
 
 
 @pytest.fixture
@@ -220,7 +220,7 @@ def test_singleton_pattern_cross_file_calls(
     This mirrors the Java TheNews issue where Storage.getInstance() and
     storage.clearAll() were not detected across files.
     """
-    from codebase_rag.parser_loader import load_parsers
+    from weavr.parser_loader import load_parsers
 
     parsers, queries = load_parsers()
 
@@ -334,7 +334,7 @@ def test_deep_package_hierarchy_cross_file_calls(
     This ensures that deeply nested packages (like app.services.data.processors.validator)
     can have their functions called from other files.
     """
-    from codebase_rag.parser_loader import load_parsers
+    from weavr.parser_loader import load_parsers
 
     parsers, queries = load_parsers()
 
@@ -431,7 +431,7 @@ def test_chained_cross_file_calls(
     main.main -> Application.start -> SceneHandler.load_menu_scene -> Storage methods
     This creates a 4-level call chain across 3 different files.
     """
-    from codebase_rag.parser_loader import load_parsers
+    from weavr.parser_loader import load_parsers
 
     parsers, queries = load_parsers()
 

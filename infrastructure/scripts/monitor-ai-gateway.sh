@@ -1,5 +1,5 @@
 #!/bin/bash
-# Monitor AI Gateway usage and performance for code-graph-rag
+# Monitor AI Gateway usage and performance for weavr
 
 set -e
 

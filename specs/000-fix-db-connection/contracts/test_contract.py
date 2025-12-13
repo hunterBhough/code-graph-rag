@@ -19,12 +19,12 @@ from typing import Protocol
 """
 The test suite is organized into three categories:
 
-1. Unit Tests (codebase_rag/tests/unit/test_graph_service.py)
+1. Unit Tests (weavr/tests/unit/test_graph_service.py)
    - Mock-based tests
    - No real Memgraph connection required
    - Fast execution (< 1 second total)
 
-2. Integration Tests (codebase_rag/tests/integration/test_database_switching.py)
+2. Integration Tests (weavr/tests/integration/test_database_switching.py)
    - Real Memgraph connection required
    - Docker compose must be running
    - Moderate execution time (5-10 seconds total)
@@ -316,12 +316,12 @@ class TestStressTestIntegration:
         """
         Test: Stress tests execute against named database
 
-        Given: Codebase indexed in 'codegraph_code-graph-rag'
+        Given: Codebase indexed in 'codegraph_weavr'
         When: Stress test runs with MEMGRAPH_DATABASE set
         Then: All queries return actual results (no connection errors)
 
         Steps:
-            1. Set MEMGRAPH_DATABASE='codegraph_code-graph-rag'
+            1. Set MEMGRAPH_DATABASE='codegraph_weavr'
             2. Run stress_test.py
             3. Verify test results: 0 "Not connected to Memgraph" errors
             4. Verify query results contain actual data from indexed codebase
@@ -527,14 +527,14 @@ CI/CD Integration:
 ------------------
 
 # Fast feedback (unit tests only)
-pytest codebase_rag/tests/unit/ -v
+pytest weavr/tests/unit/ -v
 
 # Integration tests (requires Memgraph)
 docker compose up -d
-pytest codebase_rag/tests/integration/ -v
+pytest weavr/tests/integration/ -v
 
 # Full suite
-pytest codebase_rag/tests/ -v
+pytest weavr/tests/ -v
 
 # Stress tests (optional, nightly builds)
 python stress_test.py

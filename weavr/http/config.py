@@ -10,7 +10,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class ServiceConfig(BaseModel):
     """Service identification configuration."""
 
-    name: str = Field(description="Service identifier (e.g., 'code-graph-rag')")
+    name: str = Field(description="Service identifier (e.g., 'weavr')")
     port: int = Field(description="HTTP port to listen on", ge=1024, le=65535)
     host: str = Field(default="127.0.0.1", description="Bind address")
 

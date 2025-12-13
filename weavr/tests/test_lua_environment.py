@@ -1,8 +1,8 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from codebase_rag.graph_updater import GraphUpdater
-from codebase_rag.parser_loader import load_parsers
+from weavr.graph_updater import GraphUpdater
+from weavr.parser_loader import load_parsers
 
 
 def test_global_environment_access(temp_repo: Path, mock_ingestor: MagicMock) -> None:

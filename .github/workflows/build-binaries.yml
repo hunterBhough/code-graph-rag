@@ -48,5 +48,5 @@ jobs:
     - name: Upload binary
       uses: actions/upload-artifact@v4
       with:
-        name: graph-code-${{ matrix.platform }}-${{ matrix.arch }}
-        path: dist/graph-code-*
+        name: weavr-${{ matrix.platform }}-${{ matrix.arch }}
+        path: dist/weavr-*

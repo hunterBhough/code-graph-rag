@@ -2,7 +2,7 @@
 
 ## Purpose
 
-code-graph-rag exists to answer structural questions about codebases that semantic search and document search cannot. While seekr finds semantically similar code and docwell searches documentation, code-graph-rag understands relationships: who calls this function, what classes inherit from this base, what are the circular dependencies.
+weavr exists to answer structural questions about codebases that semantic search and document search cannot. While seekr finds semantically similar code and docwell searches documentation, weavr understands relationships: who calls this function, what classes inherit from this base, what are the circular dependencies.
 
 ## Core Problem
 
@@ -30,7 +30,7 @@ Traditional search falls short. We need a knowledge graph.
 **3. Complementary, not competitive**
 - seekr: "Find code similar to this authentication pattern"
 - docwell: "Search our architecture docs for auth strategy"
-- code-graph-rag: "Show me all functions that call verify_token"
+- weavr: "Show me all functions that call verify_token"
 
 **4. Multiple indexing targets**
 - Index working project for active development
@@ -60,7 +60,7 @@ Traditional search falls short. We need a knowledge graph.
 - Design decision lookup
 - "What does our auth guide say about tokens?"
 
-**code-graph-rag** (structural queries)
+**weavr** (structural queries)
 - Graph of code relationships
 - Precise structural analysis
 - Dependency tracking
@@ -71,20 +71,20 @@ Traditional search falls short. We need a knowledge graph.
 All three tools can be used together:
 
 1. Use docwell to understand architecture principles
-2. Use code-graph-rag to map actual implementation structure
+2. Use weavr to map actual implementation structure
 3. Use seekr to find similar patterns across codebase
 4. Compare findings to ensure consistency
 
 ### Cross-Project Research
 
-code-graph-rag uniquely supports indexing multiple projects:
+weavr uniquely supports indexing multiple projects:
 
 ```bash
 # Index your project
-uv run graph-code index
+uv run weavr index
 
 # Index external repo for comparison
-uv run graph-code index --repo https://github.com/org/reference-impl
+uv run weavr index --repo https://github.com/org/reference-impl
 
 # Query both graphs
 "How does our auth differ from reference-impl?"

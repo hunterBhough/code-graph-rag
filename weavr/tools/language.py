@@ -413,7 +413,7 @@ def add_grammar(
     LANGUAGE_CONFIGS[language_name] = new_language_config
 
     # Step 5: Automatically add to language_config.py
-    config_file_path = "codebase_rag/language_config.py"
+    config_file_path = "weavr/language_config.py"
     try:
         config_content = pathlib.Path(config_file_path).read_text()
         # Generate the new config entry
@@ -466,7 +466,7 @@ def add_grammar(
             click.echo("   • Check call_node_types covers all function call patterns")
             click.echo()
             click.echo(
-                "💡 You can run 'python -m codebase_rag.tools.language list-languages' to see the current config."
+                "💡 You can run 'python -m weavr.tools.language list-languages' to see the current config."
             )
         else:
             raise ValueError("Could not find LANGUAGE_CONFIGS dictionary end")
@@ -475,7 +475,7 @@ def add_grammar(
         click.echo(f"❌ Error updating config file: {e}")
         click.echo(
             click.style(
-                "FALLBACK: Please manually add the following entry to 'LANGUAGE_CONFIGS' in 'codebase_rag/language_config.py':",
+                "FALLBACK: Please manually add the following entry to 'LANGUAGE_CONFIGS' in 'weavr/language_config.py':",
                 bold=True,
             )
         )
@@ -527,7 +527,7 @@ def remove_language(language_name: str, keep_submodule: bool = False) -> None:
         return
 
     # Step 1: Remove from config file using diff-match-patch
-    config_file = "codebase_rag/language_config.py"
+    config_file = "weavr/language_config.py"
     try:
         original_content = pathlib.Path(config_file).read_text()
         # Find and remove the language config entry with better pattern

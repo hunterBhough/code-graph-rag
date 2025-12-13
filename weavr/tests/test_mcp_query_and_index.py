@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from codebase_rag.mcp.tools import MCPToolsRegistry
+from weavr.mcp.tools import MCPToolsRegistry
 
 pytestmark = [pytest.mark.anyio]
 
@@ -212,7 +212,7 @@ class TestIndexRepository:
         self, mcp_registry: MCPToolsRegistry, temp_project_root: Path
     ) -> None:
         """Test successful repository indexing."""
-        with patch("codebase_rag.mcp.tools.GraphUpdater") as mock_updater_class:
+        with patch("weavr.mcp.tools.GraphUpdater") as mock_updater_class:
             mock_updater = MagicMock()
             mock_updater.run.return_value = None
             mock_updater_class.return_value = mock_updater
@@ -228,7 +228,7 @@ class TestIndexRepository:
         self, mcp_registry: MCPToolsRegistry, temp_project_root: Path
     ) -> None:
         """Test that GraphUpdater is created with correct parameters."""
-        with patch("codebase_rag.mcp.tools.GraphUpdater") as mock_updater_class:
+        with patch("weavr.mcp.tools.GraphUpdater") as mock_updater_class:
             mock_updater = MagicMock()
             mock_updater.run.return_value = None
             mock_updater_class.return_value = mock_updater
@@ -247,7 +247,7 @@ class TestIndexRepository:
         self, mcp_registry: MCPToolsRegistry, temp_project_root: Path
     ) -> None:
         """Test error handling during repository indexing."""
-        with patch("codebase_rag.mcp.tools.GraphUpdater") as mock_updater_class:
+        with patch("weavr.mcp.tools.GraphUpdater") as mock_updater_class:
             mock_updater = MagicMock()
             mock_updater.run.side_effect = Exception("Indexing failed")
             mock_updater_class.return_value = mock_updater
@@ -267,7 +267,7 @@ class TestIndexRepository:
             cypher_gen=MagicMock(),
         )
 
-        with patch("codebase_rag.mcp.tools.GraphUpdater") as mock_updater_class:
+        with patch("weavr.mcp.tools.GraphUpdater") as mock_updater_class:
             mock_updater = MagicMock()
             mock_updater.run.return_value = None
             mock_updater_class.return_value = mock_updater
@@ -281,7 +281,7 @@ class TestIndexRepository:
         self, mcp_registry: MCPToolsRegistry, temp_project_root: Path
     ) -> None:
         """Test indexing repository multiple times (re-indexing)."""
-        with patch("codebase_rag.mcp.tools.GraphUpdater") as mock_updater_class:
+        with patch("weavr.mcp.tools.GraphUpdater") as mock_updater_class:
             mock_updater = MagicMock()
             mock_updater.run.return_value = None
             mock_updater_class.return_value = mock_updater
@@ -301,7 +301,7 @@ class TestIndexRepository:
         self, mcp_registry: MCPToolsRegistry, temp_project_root: Path
     ) -> None:
         """Test that database is cleared before indexing."""
-        with patch("codebase_rag.mcp.tools.GraphUpdater") as mock_updater_class:
+        with patch("weavr.mcp.tools.GraphUpdater") as mock_updater_class:
             mock_updater = MagicMock()
             mock_updater.run.return_value = None
             mock_updater_class.return_value = mock_updater
@@ -329,7 +329,7 @@ class TestIndexRepository:
 
         mcp_registry.ingestor.clean_database = MagicMock(side_effect=mock_clean)  # type: ignore[method-assign]
 
-        with patch("codebase_rag.mcp.tools.GraphUpdater") as mock_updater_class:
+        with patch("weavr.mcp.tools.GraphUpdater") as mock_updater_class:
             mock_updater = MagicMock()
             mock_updater.run = MagicMock(side_effect=mock_run)
             mock_updater_class.return_value = mock_updater
@@ -363,7 +363,7 @@ class TestIndexRepository:
             cypher_gen=mock_cypher,
         )
 
-        with patch("codebase_rag.mcp.tools.GraphUpdater") as mock_updater_class:
+        with patch("weavr.mcp.tools.GraphUpdater") as mock_updater_class:
             mock_updater = MagicMock()
             mock_updater.run.return_value = None
             mock_updater_class.return_value = mock_updater
@@ -384,7 +384,7 @@ class TestQueryAndIndexIntegration:
         self, mcp_registry: MCPToolsRegistry, temp_project_root: Path
     ) -> None:
         """Test querying after indexing."""
-        with patch("codebase_rag.mcp.tools.GraphUpdater") as mock_updater_class:
+        with patch("weavr.mcp.tools.GraphUpdater") as mock_updater_class:
             mock_updater = MagicMock()
             mock_updater.run.return_value = None
             mock_updater_class.return_value = mock_updater
@@ -409,7 +409,7 @@ class TestQueryAndIndexIntegration:
         self, mcp_registry: MCPToolsRegistry, temp_project_root: Path
     ) -> None:
         """Test typical workflow: index then query."""
-        with patch("codebase_rag.mcp.tools.GraphUpdater") as mock_updater_class:
+        with patch("weavr.mcp.tools.GraphUpdater") as mock_updater_class:
             mock_updater = MagicMock()
             mock_updater.run.return_value = None
             mock_updater_class.return_value = mock_updater

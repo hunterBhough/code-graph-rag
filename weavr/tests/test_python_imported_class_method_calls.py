@@ -11,8 +11,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from codebase_rag.graph_updater import GraphUpdater
-from codebase_rag.services.graph_service import MemgraphIngestor
+from weavr.graph_updater import GraphUpdater
+from weavr.services.graph_service import MemgraphIngestor
 
 
 @pytest.fixture
@@ -129,7 +129,7 @@ def test_imported_class_method_calls_are_detected(
     Tests that GraphUpdater correctly identifies method calls on imported class instances
     across different files and modules.
     """
-    from codebase_rag.parser_loader import load_parsers
+    from weavr.parser_loader import load_parsers
 
     parsers, queries = load_parsers()
 
@@ -222,7 +222,7 @@ def test_cross_file_object_method_chaining(
     Tests that method calls on objects created from imported classes are detected,
     including chained method calls and method calls in complex expressions.
     """
-    from codebase_rag.parser_loader import load_parsers
+    from weavr.parser_loader import load_parsers
 
     parsers, queries = load_parsers()
 

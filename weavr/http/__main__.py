@@ -1,17 +1,17 @@
-"""HTTP server entry point for code-graph-rag.
+"""HTTP server entry point for weavr.
 
 This module provides a runnable entry point for starting the FastAPI HTTP server
 that exposes all MCP tools via standardized HTTP endpoints.
 
 Usage:
     # Start with defaults (config/http-server.yaml)
-    uv run python -m codebase_rag.http
+    uv run python -m weavr.http
 
     # Override host and port
-    uv run python -m codebase_rag.http --host 0.0.0.0 --port 9000
+    uv run python -m weavr.http --host 0.0.0.0 --port 9000
 
     # Use custom config file
-    uv run python -m codebase_rag.http --config /path/to/config.yaml
+    uv run python -m weavr.http --config /path/to/config.yaml
 """
 
 import argparse
@@ -21,8 +21,8 @@ from pathlib import Path
 import uvicorn
 from loguru import logger
 
-from codebase_rag.http.config import HttpServerConfig
-from codebase_rag.http.server import create_app
+from weavr.http.config import HttpServerConfig
+from weavr.http.server import create_app
 
 
 def parse_args() -> argparse.Namespace:
@@ -37,16 +37,16 @@ def parse_args() -> argparse.Namespace:
         epilog="""
 Examples:
   # Start with default configuration
-  uv run python -m codebase_rag.http
+  uv run python -m weavr.http
 
   # Override host and port
-  uv run python -m codebase_rag.http --host 0.0.0.0 --port 9000
+  uv run python -m weavr.http --host 0.0.0.0 --port 9000
 
   # Use custom config file
-  uv run python -m codebase_rag.http --config /path/to/custom-config.yaml
+  uv run python -m weavr.http --config /path/to/custom-config.yaml
 
   # Combine config file with overrides (CLI args take precedence)
-  uv run python -m codebase_rag.http --config custom.yaml --port 8888
+  uv run python -m weavr.http --config custom.yaml --port 8888
         """,
     )
 

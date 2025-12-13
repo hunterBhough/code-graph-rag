@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from codebase_rag.graph_updater import GraphUpdater
-from codebase_rag.services.graph_service import MemgraphIngestor
+from weavr.graph_updater import GraphUpdater
+from weavr.services.graph_service import MemgraphIngestor
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def test_function_call_relationships_are_created(
     """
     Tests that GraphUpdater correctly identifies and creates CALLS relationships.
     """
-    from codebase_rag.parser_loader import load_parsers
+    from weavr.parser_loader import load_parsers
 
     parsers, queries = load_parsers()
 

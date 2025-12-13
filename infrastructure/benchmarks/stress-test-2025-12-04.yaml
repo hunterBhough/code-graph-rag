@@ -82,7 +82,7 @@ results:
 
   code_retrieval:
     C1:
-      qualified_name: "codebase_rag.mcp.tools.MCPToolsRegistry"
+      qualified_name: "weavr.mcp.tools.MCPToolsRegistry"
       status: "partial"
       response_time_ms: 0
       found: false
@@ -90,7 +90,7 @@ results:
       error: "Not connected to Memgraph"
       notes: "Database retrieval unavailable"
     C2:
-      qualified_name: "codebase_rag.services.llm.CypherGenerator.generate"
+      qualified_name: "weavr.services.llm.CypherGenerator.generate"
       status: "partial"
       response_time_ms: 0
       found: false
@@ -98,7 +98,7 @@ results:
       error: "Not connected to Memgraph"
       notes: "Database retrieval unavailable"
     C3:
-      qualified_name: "codebase_rag.prompts.GRAPH_SCHEMA_AND_RULES"
+      qualified_name: "weavr.prompts.GRAPH_SCHEMA_AND_RULES"
       status: "partial"
       response_time_ms: 0
       found: false
@@ -106,7 +106,7 @@ results:
       error: "Not connected to Memgraph"
       notes: "Database retrieval unavailable"
     C4:
-      qualified_name: "codebase_rag.tools.codebase_query.create_query_tool"
+      qualified_name: "weavr.tools.codebase_query.create_query_tool"
       status: "partial"
       response_time_ms: 0
       found: false
@@ -217,7 +217,7 @@ results:
       notes: "Good performance for complex relationship queries, under target"
     P3:
       test: "Code snippet retrieval (3 iterations)"
-      query: "codebase_rag.mcp.tools.MCPToolsRegistry"
+      query: "weavr.mcp.tools.MCPToolsRegistry"
       avg_ms: 0
       max_ms: 0
       min_ms: 0

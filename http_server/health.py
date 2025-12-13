@@ -1,4 +1,4 @@
-"""Health check functionality for graph-code.
+"""Health check functionality for weavr.
 
 Auto-generated on 2025-12-11T16:22:29.154434+00:00
 """

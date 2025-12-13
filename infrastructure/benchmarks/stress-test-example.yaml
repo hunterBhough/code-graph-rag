@@ -62,28 +62,28 @@ results:
 
   code_retrieval:
     C1:
-      qualified_name: "codebase_rag.mcp.tools.MCPToolsRegistry"
+      qualified_name: "weavr.mcp.tools.MCPToolsRegistry"
       status: pass
       response_time_ms: 500
       found: true
       line_count: 150
       notes: "Full class source retrieved with all methods"
     C2:
-      qualified_name: "codebase_rag.services.llm.CypherGenerator.generate"
+      qualified_name: "weavr.services.llm.CypherGenerator.generate"
       status: pass
       response_time_ms: 300
       found: true
       line_count: 20
       notes: "Method source correctly extracted"
     C3:
-      qualified_name: "codebase_rag.prompts.GRAPH_SCHEMA_AND_RULES"
+      qualified_name: "weavr.prompts.GRAPH_SCHEMA_AND_RULES"
       status: partial
       response_time_ms: 250
       found: true
       line_count: 45
       notes: "Retrieved but constants may need special handling"
     C4:
-      qualified_name: "codebase_rag.tools.codebase_query.create_query_tool"
+      qualified_name: "weavr.tools.codebase_query.create_query_tool"
       status: pass
       response_time_ms: 350
       found: true

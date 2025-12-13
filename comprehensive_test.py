@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-Comprehensive end-to-end test for code-graph-rag structural query engine.
+Comprehensive end-to-end test for weavr structural query engine.
 Tests indexing, all 7 structural query tools, and natural language queries.
 """
 from pathlib import Path
 from loguru import logger
 import sys
 
-from codebase_rag.services.graph_service import MemgraphIngestor
-from codebase_rag.parser_loader import load_parsers
-from codebase_rag.graph_updater import GraphUpdater
-from codebase_rag.config import settings
-from codebase_rag.tools.structural_queries import (
+from weavr.services.graph_service import MemgraphIngestor
+from weavr.parser_loader import load_parsers
+from weavr.graph_updater import GraphUpdater
+from weavr.config import settings
+from weavr.tools.structural_queries import (
     FindCallersQuery,
     ClassHierarchyQuery,
     DependencyAnalysisQuery,
@@ -26,13 +26,13 @@ logger.remove()
 logger.add(sys.stdout, level="INFO", format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <level>{message}</level>")
 
 def index_project():
-    """Index the code-graph-rag project."""
+    """Index the weavr project."""
     logger.info("=" * 80)
-    logger.info("STEP 1: Indexing code-graph-rag project")
+    logger.info("STEP 1: Indexing weavr project")
     logger.info("=" * 80)
 
     repo_path = Path(".")
-    project_name = "code-graph-rag"
+    project_name = "weavr"
 
     with MemgraphIngestor(
         host=settings.MEMGRAPH_HOST,
@@ -78,7 +78,7 @@ def test_structural_queries():
     logger.info("STEP 2: Testing Structural Query Tools")
     logger.info("=" * 80)
 
-    project_name = "code-graph-rag"
+    project_name = "weavr"
     results = {}
 
     with MemgraphIngestor(
